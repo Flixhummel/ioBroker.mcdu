@@ -61,12 +61,14 @@
           "sm": 12
         },
         "_deviceSelector": {
-          "type": "autocompleteSendTo",
+          "type": "select",
           "label": "Select Device",
-          "command": "browseDevices",
           "sm": 12,
           "md": 6,
-          "help": "Choose a device to configure its pages"
+          "help": "Choose a device to configure its pages",
+          "options": {
+            "data": "browseDevices"
+          }
         },
         "_deviceDetails": {
           "type": "staticText",
