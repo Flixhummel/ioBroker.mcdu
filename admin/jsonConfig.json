@@ -5,7 +5,6 @@
     "mqtt": {
       "type": "panel",
       "label": "MQTT Connection",
-      "icon": "settings_input_antenna",
       "items": {
         "_mqttInfo": {
           "type": "staticText",
@@ -55,7 +54,6 @@
     "devices": {
       "type": "panel",
       "label": "Device Management",
-      "icon": "devices",
       "items": {
         "_deviceInfo": {
           "type": "staticText",
@@ -81,7 +79,6 @@
     "pages": {
       "type": "panel",
       "label": "Page Configuration",
-      "icon": "view_list",
       "items": {
         "_pagesInfo": {
           "type": "staticText",
@@ -218,7 +215,6 @@
     "about": {
       "type": "panel",
       "label": "About",
-      "icon": "info",
       "items": {
         "_description": {
           "type": "staticText",
