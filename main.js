@@ -740,7 +740,12 @@ class McduAdapter extends utils.Adapter {
                     break;
                     
                 case 'getPageList':
+                case 'browsePages':
                     this.handleGetPageList(obj);
+                    break;
+                
+                case 'browseDevices':
+                    this.handleBrowseDevices(obj);
                     break;
                     
                 case 'browseStates':
@@ -809,6 +814,22 @@ class McduAdapter extends utils.Adapter {
         
         this.sendTo(obj.from, obj.command, pageList, obj.callback);
         this.log.debug(`Returned page list: ${pageList.length} pages`);
+    }
+    
+    /**
+     * Handle browseDevices command from admin UI
+     * Returns list of all registered MCDU devices
+     * @param {object} obj - Message object
+     */
+    handleBrowseDevices(obj) {
+        // Get all registered devices from registry
+        const deviceList = Array.from(this.deviceRegistry.values()).map(device => ({
+            label: `${device.deviceId} (${device.hostname})`,
+            value: device.deviceId
+        }));
+        
+        this.sendTo(obj.from, obj.command, deviceList, obj.callback);
+        this.log.debug(`Returned device list: ${deviceList.length} devices`);
     }
     
     /**
