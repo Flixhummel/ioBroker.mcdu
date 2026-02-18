@@ -177,6 +177,18 @@ function connectMQTT() {
       timestamp: Date.now()
     }), {qos: 1, retain: true});
     
+    // Announce device to adapter (Phase 1: Device Registration)
+    const deviceAnnouncement = {
+      deviceId: CONFIG.mqtt.clientId,
+      hostname: require('os').hostname(),
+      ipAddress: getLocalIPAddress(),
+      version: '1.0.0',
+      timestamp: Date.now()
+    };
+    
+    mqttClient.publish(topic('status/announce'), JSON.stringify(deviceAnnouncement), {qos: 1});
+    log.info('📡 Device announced:', deviceAnnouncement.deviceId);
+    
     // Subscribe to command topics
     const topics = [
       topic('display/set'),
@@ -590,6 +602,30 @@ function startMockButtonEvents() {
     setTimeout(() => handleButtonEvent(button, 'release'), 100);
     idx++;
   }, 5000);
+}
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Get local IP address
+ * @returns {string} IP address or 'unknown'
+ */
+function getLocalIPAddress() {
+  const os = require('os');
+  const interfaces = os.networkInterfaces();
+  
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Skip internal and non-IPv4 addresses
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  
+  return 'unknown';
 }
 
 // ============================================================================

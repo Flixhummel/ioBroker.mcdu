@@ -155,6 +155,15 @@ class McduAdapter extends utils.Adapter {
             
             this.log.debug('Timeout check interval started');
             
+            // Phase 3.7: Subscribe to device announcements
+            this.log.debug('Subscribing to device announcements...');
+            await this.mqttClient.subscribe('status/announce', (topic, message) => {
+                this.handleDeviceAnnouncement(message).catch(error => {
+                    this.log.error(`Failed to handle device announcement: ${error.message}`);
+                });
+            });
+            this.log.info('✅ Device announcement subscription active');
+            
             // Phase 4: Setup button event handling
             this.log.debug('Setting up button event handling...');
             this.buttonSubscriber = new ButtonSubscriber(this, this.mqttClient);
@@ -795,6 +804,71 @@ class McduAdapter extends utils.Adapter {
         
         this.sendTo(obj.from, obj.command, pageList, obj.callback);
         this.log.debug(`Returned page list: ${pageList.length} pages`);
+    }
+    
+    /**
+     * Handle device announcement from MCDU client
+     * @param {Buffer} message - MQTT message buffer
+     */
+    async handleDeviceAnnouncement(message) {
+        try {
+            const announcement = JSON.parse(message.toString());
+            const { deviceId, hostname, ipAddress, version } = announcement;
+            
+            if (!deviceId) {
+                this.log.warn('Device announcement missing deviceId');
+                return;
+            }
+            
+            this.log.info(`📡 Device announcement: ${deviceId} (${hostname || 'unknown'} @ ${ipAddress || 'unknown'})`);
+            
+            // Check if device is already registered
+            const existingDevice = this.deviceRegistry.get(deviceId);
+            
+            if (existingDevice) {
+                // Update existing device
+                existingDevice.lastSeen = Date.now();
+                existingDevice.hostname = hostname || existingDevice.hostname;
+                existingDevice.ipAddress = ipAddress || existingDevice.ipAddress;
+                existingDevice.version = version || existingDevice.version;
+                
+                this.log.debug(`Updated existing device: ${deviceId}`);
+                
+                // Update lastSeen state
+                await this.setStateAsync(`devices.${deviceId}.lastSeen`, Date.now(), true);
+                
+            } else {
+                // Register new device
+                this.deviceRegistry.set(deviceId, {
+                    deviceId,
+                    hostname: hostname || 'unknown',
+                    ipAddress: ipAddress || 'unknown',
+                    version: version || 'unknown',
+                    firstSeen: Date.now(),
+                    lastSeen: Date.now()
+                });
+                
+                this.log.info(`✅ New device registered: ${deviceId}`);
+                
+                // Create ioBroker objects for device
+                await this.stateManager.createDeviceObjects(deviceId, {
+                    hostname: hostname || 'unknown',
+                    ipAddress: ipAddress || 'unknown',
+                    version: version || 'unknown'
+                });
+                
+                this.log.debug(`Created ioBroker objects for device ${deviceId}`);
+            }
+            
+            // Update devices online count
+            const onlineCount = this.deviceRegistry.size;
+            await this.setStateAsync('info.devicesOnline', onlineCount, true);
+            this.log.debug(`Devices online: ${onlineCount}`);
+            
+        } catch (error) {
+            this.log.error(`Error handling device announcement: ${error.message}`);
+            this.log.debug(error.stack);
+        }
     }
     
     /**
