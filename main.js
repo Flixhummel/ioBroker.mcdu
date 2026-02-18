@@ -742,6 +742,10 @@ class McduAdapter extends utils.Adapter {
                     this.handleGetPageList(obj);
                     break;
                     
+                case 'browseStates':
+                    this.handleBrowseStates(obj);
+                    break;
+                    
                 default:
                     this.log.warn(`Unknown command: ${obj.command}`);
                     this.sendTo(obj.from, obj.command, { error: 'Unknown command' }, obj.callback);
@@ -804,6 +808,87 @@ class McduAdapter extends utils.Adapter {
         
         this.sendTo(obj.from, obj.command, pageList, obj.callback);
         this.log.debug(`Returned page list: ${pageList.length} pages`);
+    }
+    
+    /**
+     * Handle browseStates command from admin UI
+     * Returns list of all ioBroker states for selection in UI
+     * @param {object} obj - Message object with optional filter
+     */
+    async handleBrowseStates(obj) {
+        try {
+            const { filter, type } = obj.message || {};
+            
+            this.log.debug(`Browsing states with filter: ${filter || 'none'}, type: ${type || 'all'}`);
+            
+            // Get all objects from ioBroker
+            const allObjects = await this.getForeignObjectsAsync('*', 'state');
+            
+            let states = [];
+            
+            for (const [id, stateObj] of Object.entries(allObjects)) {
+                // Skip adapter's own states
+                if (id.startsWith(`${this.namespace}.`)) {
+                    continue;
+                }
+                
+                // Build state info
+                const stateInfo = {
+                    id: id,
+                    name: stateObj.common?.name || id,
+                    type: stateObj.common?.type || 'mixed',
+                    role: stateObj.common?.role || 'state',
+                    unit: stateObj.common?.unit || '',
+                    read: stateObj.common?.read !== false,
+                    write: stateObj.common?.write !== false,
+                    min: stateObj.common?.min,
+                    max: stateObj.common?.max,
+                    states: stateObj.common?.states
+                };
+                
+                // Apply type filter if specified
+                if (type && stateObj.common?.type !== type) {
+                    continue;
+                }
+                
+                // Apply text filter if specified
+                if (filter) {
+                    const searchText = filter.toLowerCase();
+                    if (!id.toLowerCase().includes(searchText) && 
+                        !(stateInfo.name && stateInfo.name.toLowerCase().includes(searchText))) {
+                        continue;
+                    }
+                }
+                
+                states.push(stateInfo);
+            }
+            
+            // Sort by ID
+            states.sort((a, b) => a.id.localeCompare(b.id));
+            
+            // Limit results to prevent UI overload
+            const maxResults = 500;
+            if (states.length > maxResults) {
+                this.log.debug(`Limiting results from ${states.length} to ${maxResults}`);
+                states = states.slice(0, maxResults);
+            }
+            
+            this.log.debug(`Returning ${states.length} states`);
+            
+            this.sendTo(obj.from, obj.command, {
+                success: true,
+                states: states,
+                total: states.length,
+                limited: states.length >= maxResults
+            }, obj.callback);
+            
+        } catch (error) {
+            this.log.error(`Error browsing states: ${error.message}`);
+            this.sendTo(obj.from, obj.command, { 
+                success: false,
+                error: error.message 
+            }, obj.callback);
+        }
     }
     
     /**

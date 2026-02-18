@@ -6,6 +6,11 @@
       "type": "panel",
       "label": "Connection",
       "items": {
+        "_mqttInfo": {
+          "type": "staticText",
+          "text": "Configure MQTT broker connection for MCDU client communication.",
+          "sm": 12
+        },
         "mqtt.broker": {
           "type": "text",
           "label": "MQTT Broker",
@@ -17,6 +22,8 @@
           "type": "number",
           "label": "Port",
           "default": 1883,
+          "min": 1,
+          "max": 65535,
           "sm": 12,
           "md": 3
         },
@@ -41,7 +48,7 @@
       "items": {
         "_pagesInfo": {
           "type": "staticText",
-          "text": "Configure MCDU pages. Each page can have up to 14 lines with buttons and display content.",
+          "text": "Configure MCDU pages. Each page can have up to 14 lines with buttons, displays, and datapoints.",
           "sm": 12
         },
         "pages": {
@@ -54,14 +61,25 @@
               "attr": "id",
               "title": "Page ID",
               "width": "150px",
-              "default": ""
+              "default": "",
+              "placeholder": "home-main"
             },
             {
               "type": "text",
               "attr": "name",
               "title": "Name",
               "width": "200px",
-              "default": ""
+              "default": "",
+              "placeholder": "Main Menu"
+            },
+            {
+              "type": "autocompleteSendTo",
+              "attr": "parent",
+              "title": "Parent",
+              "width": "150px",
+              "command": "getPageList",
+              "allowNonListValues": true,
+              "placeholder": "(root)"
             },
             {
               "type": "checkbox",
@@ -72,9 +90,77 @@
             }
           ]
         },
-        "_pageConfigInfo": {
+        "_divider1": {
+          "type": "divider"
+        },
+        "_lineConfigInfo": {
           "type": "staticText",
-          "text": "For detailed page configuration (lines, buttons, displays), edit the native configuration or use sendTo commands.",
+          "text": "**Line Configuration:** To configure page content (buttons, displays, datapoints), edit the 'lines' property below. Each line can have left button, display content, and right button.",
+          "sm": 12
+        },
+        "_lineSchema": {
+          "type": "staticText",
+          "text": "**Line Schema Example:**\n```json\n[\n  {\n    \"row\": 1,\n    \"leftButton\": {\n      \"type\": \"navigation\",\n      \"target\": \"target-page-id\",\n      \"label\": \"LIGHTS\"\n    },\n    \"display\": {\n      \"type\": \"label\",\n      \"label\": \"Living Room\",\n      \"color\": \"white\"\n    },\n    \"rightButton\": {\n      \"type\": \"empty\"\n    }\n  }\n]\n```",
+          "sm": 12
+        },
+        "selectedPageForEdit": {
+          "type": "select",
+          "label": "Select Page to Edit Lines",
+          "options": [],
+          "noTranslation": true,
+          "sm": 12,
+          "md": 6
+        },
+        "pageLines": {
+          "type": "jsonEditor",
+          "label": "Page Lines (JSON)",
+          "help": "Configure lines for the selected page. Use the schema example above.",
+          "validateJson": true,
+          "sm": 12
+        }
+      }
+    },
+    "states": {
+      "type": "panel",
+      "label": "State Browser",
+      "items": {
+        "_statesInfo": {
+          "type": "staticText",
+          "text": "Browse ioBroker states to use in page displays and buttons.",
+          "sm": 12
+        },
+        "stateFilter": {
+          "type": "text",
+          "label": "Filter States",
+          "placeholder": "Type to search...",
+          "sm": 12,
+          "md": 6
+        },
+        "stateTypeFilter": {
+          "type": "select",
+          "label": "Type Filter",
+          "options": [
+            {"label": "All", "value": ""},
+            {"label": "Boolean", "value": "boolean"},
+            {"label": "Number", "value": "number"},
+            {"label": "String", "value": "string"}
+          ],
+          "default": "",
+          "sm": 12,
+          "md": 3
+        },
+        "refreshStates": {
+          "type": "sendTo",
+          "command": "browseStates",
+          "jsonData": "{\"filter\": \"${data.stateFilter}\", \"type\": \"${data.stateTypeFilter}\"}",
+          "variant": "contained",
+          "label": "Search States",
+          "sm": 12,
+          "md": 3
+        },
+        "_statesHelp": {
+          "type": "staticText",
+          "text": "Click 'Search States' to browse available states. Results will be logged to console (for now - full UI selector coming in next update).",
           "sm": 12
         }
       }
@@ -96,6 +182,22 @@
           "default": "white",
           "sm": 12,
           "md": 6
+        }
+      }
+    },
+    "devices": {
+      "type": "panel",
+      "label": "Devices",
+      "items": {
+        "_devicesInfo": {
+          "type": "staticText",
+          "text": "Connected MCDU devices. Devices auto-register when they connect via MQTT.",
+          "sm": 12
+        },
+        "_devicesNote": {
+          "type": "staticText",
+          "text": "Check the Objects tab (mcdu.0 → devices) to see registered devices and their status.",
+          "sm": 12
         }
       }
     },
