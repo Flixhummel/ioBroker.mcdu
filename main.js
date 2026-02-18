@@ -821,15 +821,46 @@ class McduAdapter extends utils.Adapter {
      * Returns list of all registered MCDU devices
      * @param {object} obj - Message object
      */
-    handleBrowseDevices(obj) {
-        // Get all registered devices from registry
-        const deviceList = Array.from(this.deviceRegistry.values()).map(device => ({
-            label: `${device.deviceId} (${device.hostname})`,
-            value: device.deviceId
-        }));
-        
-        this.sendTo(obj.from, obj.command, deviceList, obj.callback);
-        this.log.debug(`Returned device list: ${deviceList.length} devices`);
+    async handleBrowseDevices(obj) {
+        try {
+            // Get all device objects from ioBroker (more reliable than in-memory registry)
+            const devices = await this.getObjectViewAsync('system', 'channel', {
+                startkey: `${this.namespace}.devices.`,
+                endkey: `${this.namespace}.devices.\u9999`
+            });
+            
+            const deviceList = [];
+            
+            if (devices && devices.rows) {
+                for (const row of devices.rows) {
+                    // Extract deviceId from: mcdu.0.devices.mcdu-client-mcdu-pi
+                    const deviceId = row.id.split('.').pop();
+                    
+                    // Get hostname from info state (if available)
+                    let hostname = 'unknown';
+                    try {
+                        const hostnameState = await this.getStateAsync(`devices.${deviceId}.info.hostname`);
+                        if (hostnameState && hostnameState.val) {
+                            hostname = hostnameState.val;
+                        }
+                    } catch (err) {
+                        this.log.debug(`Could not get hostname for ${deviceId}: ${err.message}`);
+                    }
+                    
+                    deviceList.push({
+                        label: `${deviceId} (${hostname})`,
+                        value: deviceId
+                    });
+                }
+            }
+            
+            this.log.info(`browseDevices: Found ${deviceList.length} devices`);
+            this.sendTo(obj.from, obj.command, deviceList, obj.callback);
+            
+        } catch (error) {
+            this.log.error(`Error in browseDevices: ${error.message}`);
+            this.sendTo(obj.from, obj.command, { error: error.message }, obj.callback);
+        }
     }
     
     /**
