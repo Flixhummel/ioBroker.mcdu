@@ -5,7 +5,6 @@
     "generalTab": {
       "type": "panel",
       "label": "General Settings",
-      "icon": "settings",
       "items": {
         "mqttSettings": {
           "type": "panel",
@@ -130,55 +129,46 @@
     "pagesTab": {
       "type": "panel",
       "label": "Pages",
-      "icon": "pages",
       "items": {
         "pages": {
           "type": "accordion",
           "label": "MCDU Pages",
           "titleAttr": "name",
           "clone": true,
-          "items": {
-            "id": {
+          "items": [
+            {
               "type": "text",
+              "attr": "id",
+              "sm": 12,
+              "md": 6,
               "label": "Page ID",
               "pattern": "^[a-z0-9-]+$",
               "placeholder": "home-main",
-              "help": "Unique page identifier (lowercase, numbers, dashes only)",
-              "sm": 12,
-              "md": 6
+              "help": "Unique page identifier (lowercase, numbers, dashes only)"
             },
-            "name": {
+            {
               "type": "text",
+              "attr": "name",
+              "sm": 12,
+              "md": 6,
               "label": "Page Name",
               "placeholder": "Hauptmenu",
-              "help": "Display name for this page",
-              "sm": 12,
-              "md": 6
+              "help": "Display name for this page"
             },
-            "parent": {
-              "type": "autocompleteSendTo",
-              "label": "Parent Page",
-              "command": "getPageList",
-              "allowNonListValues": true,
-              "help": "Leave empty for root page",
-              "sm": 12,
-              "md": 6
-            },
-            "icon": {
+            {
               "type": "text",
-              "label": "Icon",
-              "placeholder": "home",
-              "help": "Optional icon name (Material Icons)",
+              "attr": "parent",
               "sm": 12,
-              "md": 6
+              "md": 6,
+              "label": "Parent Page",
+              "placeholder": "home-main",
+              "help": "Page ID of parent page (leave empty for root page)"
             },
-            "_dividerLines": {
-              "type": "divider",
-              "text": "Lines Configuration"
-            },
-            "lines": {
+            {
               "type": "table",
+              "attr": "lines",
               "label": "Lines Configuration",
+              "sm": 12,
               "maxRows": 14,
               "items": [
                 {
@@ -283,7 +273,7 @@
                       "label": "Unit",
                       "placeholder": "°C",
                       "maxLength": 5,
-                      "help": "Unit suffix (e.g., °C, km/h, %)",
+                      "help": "Unit suffix (e.g., km/h, %)",
                       "hidden": "${data.display.type !== 'datapoint'}"
                     },
                     "color": {
@@ -420,14 +410,13 @@
                 }
               ]
             }
-          }
+          ]
         }
       }
     },
     "templatesTab": {
       "type": "panel",
       "label": "Templates",
-      "icon": "library_books",
       "items": {
         "templatesInfo": {
           "type": "staticText",
@@ -472,7 +461,6 @@
     "devicesTab": {
       "type": "panel",
       "label": "Devices",
-      "icon": "devices",
       "items": {
         "devicesInfo": {
           "type": "staticText",
@@ -492,7 +480,6 @@
     "advancedTab": {
       "type": "panel",
       "label": "Advanced",
-      "icon": "build",
       "items": {
         "debugSettings": {
           "type": "panel",
