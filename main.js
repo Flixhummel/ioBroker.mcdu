@@ -893,11 +893,17 @@ class McduAdapter extends utils.Adapter {
             
             const deviceList = [];
             
+            const prefix = `${this.namespace}.devices.`;
             if (devices && devices.rows) {
                 for (const row of devices.rows) {
-                    // Extract deviceId from: mcdu.0.devices.mcdu-client-mcdu-pi
-                    const deviceId = row.id.split('.').pop();
-                    
+                    // Only include direct children (depth 4: mcdu.0.devices.{deviceId})
+                    // Skip sub-channels like mcdu.0.devices.{deviceId}.info
+                    const parts = row.id.split('.');
+                    if (parts.length !== 4) {
+                        continue;
+                    }
+                    const deviceId = parts[3];
+
                     // Get hostname from info state (if available)
                     let hostname = 'unknown';
                     try {
@@ -908,7 +914,7 @@ class McduAdapter extends utils.Adapter {
                     } catch (err) {
                         this.log.debug(`Could not get hostname for ${deviceId}: ${err.message}`);
                     }
-                    
+
                     deviceList.push({
                         label: `${deviceId} (${hostname})`,
                         value: deviceId
