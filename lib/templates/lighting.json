@@ -1,203 +1,91 @@
 {
   "name": "Lighting Control",
   "description": "Room-by-room light switches with status display",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": "Kira Holt",
   "preview": null,
   "pages": [
     {
       "id": "lights-main",
-      "name": "Licht Übersicht",
+      "name": "Licht Uebersicht",
       "parent": null,
-      "icon": "lightbulb",
       "lines": [
         {
           "row": 1,
-          "leftButton": {
-            "type": "empty"
+          "left": {
+            "label": "",
+            "display": { "type": "label", "text": "LIGHTING CONTROL", "color": "yellow" },
+            "button": { "type": "empty" }
           },
-          "display": {
-            "type": "label",
-            "label": "LIGHTING CONTROL",
-            "color": "yellow",
-            "align": "center"
-          },
-          "rightButton": {
-            "type": "empty"
-          }
-        },
-        {
-          "row": 2,
-          "leftButton": {
-            "type": "empty"
-          },
-          "display": {
-            "type": "empty"
-          },
-          "rightButton": {
-            "type": "empty"
+          "right": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "empty" }
           }
         },
         {
           "row": 3,
-          "leftButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "LIVING"
+          "left": {
+            "label": "WOHNZIMMER",
+            "display": { "type": "datapoint", "text": "Living Room", "source": "", "format": "%s", "color": "white" },
+            "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
-          "display": {
-            "type": "datapoint",
-            "label": "Living Room",
-            "source": "",
-            "format": "%s",
-            "color": "white",
-            "align": "left",
-            "editable": false
-          },
-          "rightButton": {
-            "type": "navigation",
-            "action": "goto",
-            "target": "lights-living-detail",
-            "label": "DETAIL"
-          }
-        },
-        {
-          "row": 4,
-          "leftButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "KITCHEN"
-          },
-          "display": {
-            "type": "datapoint",
-            "label": "Kitchen",
-            "source": "",
-            "format": "%s",
-            "color": "white",
-            "align": "left",
-            "editable": false
-          },
-          "rightButton": {
-            "type": "empty"
+          "right": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "navigation", "action": "goto", "target": "lights-living-detail" }
           }
         },
         {
           "row": 5,
-          "leftButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "BEDROOM"
+          "left": {
+            "label": "KUECHE",
+            "display": { "type": "datapoint", "text": "Kitchen", "source": "", "format": "%s", "color": "white" },
+            "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
-          "display": {
-            "type": "datapoint",
-            "label": "Bedroom",
-            "source": "",
-            "format": "%s",
-            "color": "white",
-            "align": "left",
-            "editable": false
-          },
-          "rightButton": {
-            "type": "empty"
-          }
-        },
-        {
-          "row": 6,
-          "leftButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "BATHROOM"
-          },
-          "display": {
-            "type": "datapoint",
-            "label": "Bathroom",
-            "source": "",
-            "format": "%s",
-            "color": "white",
-            "align": "left",
-            "editable": false
-          },
-          "rightButton": {
-            "type": "empty"
+          "right": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "empty" }
           }
         },
         {
           "row": 7,
-          "leftButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "HALLWAY"
+          "left": {
+            "label": "SCHLAFZIMMER",
+            "display": { "type": "datapoint", "text": "Bedroom", "source": "", "format": "%s", "color": "white" },
+            "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
-          "display": {
-            "type": "datapoint",
-            "label": "Hallway",
-            "source": "",
-            "format": "%s",
-            "color": "white",
-            "align": "left",
-            "editable": false
-          },
-          "rightButton": {
-            "type": "empty"
-          }
-        },
-        {
-          "row": 8,
-          "leftButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "OUTSIDE"
-          },
-          "display": {
-            "type": "datapoint",
-            "label": "Outside",
-            "source": "",
-            "format": "%s",
-            "color": "white",
-            "align": "left",
-            "editable": false
-          },
-          "rightButton": {
-            "type": "empty"
+          "right": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "empty" }
           }
         },
         {
           "row": 9,
-          "leftButton": {
-            "type": "empty"
+          "left": {
+            "label": "BAD",
+            "display": { "type": "datapoint", "text": "Bathroom", "source": "", "format": "%s", "color": "white" },
+            "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
-          "display": {
-            "type": "empty"
-          },
-          "rightButton": {
-            "type": "empty"
+          "right": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "empty" }
           }
         },
         {
-          "row": 10,
-          "leftButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "ALL ON"
+          "row": 11,
+          "left": {
+            "label": "",
+            "display": { "type": "label", "text": "Toggle All Lights", "color": "amber" },
+            "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
-          "display": {
-            "type": "label",
-            "label": "Toggle All Lights",
-            "color": "amber",
-            "align": "left"
-          },
-          "rightButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "ALL OFF"
+          "right": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "datapoint", "action": "toggle", "target": "" }
           }
         }
       ]
@@ -206,136 +94,70 @@
       "id": "lights-living-detail",
       "name": "Wohnzimmer Licht Details",
       "parent": "lights-main",
-      "icon": "lightbulb",
       "lines": [
         {
           "row": 1,
-          "leftButton": {
-            "type": "empty"
+          "left": {
+            "label": "",
+            "display": { "type": "label", "text": "LIVING ROOM", "color": "yellow" },
+            "button": { "type": "empty" }
           },
-          "display": {
-            "type": "label",
-            "label": "LIVING ROOM",
-            "color": "yellow",
-            "align": "center"
-          },
-          "rightButton": {
-            "type": "navigation",
-            "action": "goto",
-            "target": "lights-main",
-            "label": "ZURÜCK"
-          }
-        },
-        {
-          "row": 2,
-          "leftButton": {
-            "type": "empty"
-          },
-          "display": {
-            "type": "empty"
-          },
-          "rightButton": {
-            "type": "empty"
+          "right": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "navigation", "action": "goto", "target": "lights-main" }
           }
         },
         {
           "row": 3,
-          "leftButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "CEILING"
+          "left": {
+            "label": "DECKE",
+            "display": { "type": "datapoint", "text": "Ceiling Light", "source": "", "format": "%s", "color": "white" },
+            "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
-          "display": {
-            "type": "datapoint",
-            "label": "Ceiling Light",
-            "source": "",
-            "format": "%s",
-            "color": "white",
-            "align": "left",
-            "editable": false
-          },
-          "rightButton": {
-            "type": "empty"
-          }
-        },
-        {
-          "row": 4,
-          "leftButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "TABLE"
-          },
-          "display": {
-            "type": "datapoint",
-            "label": "Table Lamp",
-            "source": "",
-            "format": "%s",
-            "color": "white",
-            "align": "left",
-            "editable": false
-          },
-          "rightButton": {
-            "type": "empty"
+          "right": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "empty" }
           }
         },
         {
           "row": 5,
-          "leftButton": {
-            "type": "datapoint",
-            "action": "toggle",
-            "target": "",
-            "label": "READING"
+          "left": {
+            "label": "TISCH",
+            "display": { "type": "datapoint", "text": "Table Lamp", "source": "", "format": "%s", "color": "white" },
+            "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
-          "display": {
-            "type": "datapoint",
-            "label": "Reading Light",
-            "source": "",
-            "format": "%s",
-            "color": "white",
-            "align": "left",
-            "editable": false
-          },
-          "rightButton": {
-            "type": "empty"
-          }
-        },
-        {
-          "row": 6,
-          "leftButton": {
-            "type": "empty"
-          },
-          "display": {
-            "type": "empty"
-          },
-          "rightButton": {
-            "type": "empty"
+          "right": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "empty" }
           }
         },
         {
           "row": 7,
-          "leftButton": {
-            "type": "empty"
+          "left": {
+            "label": "LESEN",
+            "display": { "type": "datapoint", "text": "Reading Light", "source": "", "format": "%s", "color": "white" },
+            "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
-          "display": {
-            "type": "datapoint",
-            "label": "Brightness",
-            "source": "",
-            "format": "%d%%",
-            "unit": "%",
-            "color": "amber",
-            "align": "right",
-            "editable": true,
-            "inputType": "numeric",
-            "validation": {
-              "min": 0,
-              "max": 100,
-              "step": 10
-            }
+          "right": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "empty" }
+          }
+        },
+        {
+          "row": 9,
+          "left": {
+            "label": "",
+            "display": { "type": "empty" },
+            "button": { "type": "empty" }
           },
-          "rightButton": {
-            "type": "empty"
+          "right": {
+            "label": "HELLIGKEIT",
+            "display": { "type": "datapoint", "text": "Brightness", "source": "", "format": "%d%%", "unit": "%", "color": "amber", "editable": true, "inputType": "numeric", "validation": { "min": 0, "max": 100, "step": 10 } },
+            "button": { "type": "empty" }
           }
         }
       ]

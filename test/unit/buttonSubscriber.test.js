@@ -18,15 +18,41 @@ describe('ButtonSubscriber', () => {
                     lines: [
                         {
                             row: 1,
-                            leftButton: { type: 'navigation', action: 'goto', target: 'lights-main' },
-                            display: { type: 'label', label: 'LIGHTS' },
-                            rightButton: { type: 'empty' }
+                            left: {
+                                label: '',
+                                display: { type: 'label', text: 'LIGHTS' },
+                                button: { type: 'navigation', action: 'goto', target: 'lights-main' }
+                            },
+                            right: {
+                                label: '',
+                                display: { type: 'empty' },
+                                button: { type: 'empty' }
+                            }
                         },
                         {
                             row: 3,
-                            leftButton: { type: 'empty' },
-                            display: { type: 'label', label: 'CLIMATE' },
-                            rightButton: { type: 'navigation', action: 'goto', target: 'climate-main' }
+                            left: {
+                                label: '',
+                                display: { type: 'label', text: 'CLIMATE' },
+                                button: { type: 'empty' }
+                            },
+                            right: {
+                                label: '',
+                                display: { type: 'empty' },
+                                button: { type: 'navigation', action: 'goto', target: 'climate-main' }
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: 'old-format-page',
+                    name: 'Old Format',
+                    lines: [
+                        {
+                            row: 1,
+                            leftButton: { type: 'navigation', action: 'goto', target: 'lights-main' },
+                            display: { type: 'label', label: 'LIGHTS' },
+                            rightButton: { type: 'empty' }
                         }
                     ]
                 },
@@ -63,6 +89,50 @@ describe('ButtonSubscriber', () => {
                 expect(subscriber.buttonRowMap.get(`LSK${i}L`)).to.equal(expectedRow);
                 expect(subscriber.buttonRowMap.get(`LSK${i}R`)).to.equal(expectedRow);
             }
+        });
+    });
+
+    describe('getButtonConfig', () => {
+        it('should get left button from new format', () => {
+            const lineConfig = {
+                row: 1,
+                left: { button: { type: 'navigation', action: 'goto', target: 'test' } },
+                right: { button: { type: 'empty' } }
+            };
+            const result = subscriber.getButtonConfig(lineConfig, 'left');
+            expect(result.type).to.equal('navigation');
+            expect(result.target).to.equal('test');
+        });
+
+        it('should get right button from new format', () => {
+            const lineConfig = {
+                row: 1,
+                left: { button: { type: 'empty' } },
+                right: { button: { type: 'datapoint', action: 'toggle', target: 'state.0' } }
+            };
+            const result = subscriber.getButtonConfig(lineConfig, 'right');
+            expect(result.type).to.equal('datapoint');
+        });
+
+        it('should get left button from old format', () => {
+            const lineConfig = {
+                row: 1,
+                leftButton: { type: 'navigation', action: 'goto', target: 'old-target' },
+                rightButton: { type: 'empty' }
+            };
+            const result = subscriber.getButtonConfig(lineConfig, 'left');
+            expect(result.type).to.equal('navigation');
+            expect(result.target).to.equal('old-target');
+        });
+
+        it('should get right button from old format', () => {
+            const lineConfig = {
+                row: 1,
+                leftButton: { type: 'empty' },
+                rightButton: { type: 'datapoint', action: 'toggle', target: 'old-state' }
+            };
+            const result = subscriber.getButtonConfig(lineConfig, 'right');
+            expect(result.type).to.equal('datapoint');
         });
     });
 
@@ -234,7 +304,6 @@ describe('ButtonSubscriber', () => {
             let modeSet = null;
             inputModeManager.setState = async (mode) => { modeSet = mode; };
 
-            // Set up pageRenderer mock
             adapter.pageRenderer = { currentPageOffset: 0, totalPages: 1 };
             adapter.renderCurrentPage = async () => {};
             adapter.navigatePrevious = async () => {};

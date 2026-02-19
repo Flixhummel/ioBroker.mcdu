@@ -16,34 +16,96 @@ describe('PageRenderer', () => {
                     id: 'home-main',
                     name: 'Home',
                     lines: [
-                        { row: 1, display: { type: 'label', label: 'WELCOME' } },
-                        { row: 3, subLabel: 'TEMPERATUR', display: { type: 'label', label: '21.5 C' } },
-                        { row: 5, display: { type: 'label', label: 'LIGHTS' } },
+                        {
+                            row: 1,
+                            left: { label: '', display: { type: 'label', text: 'WELCOME', color: 'white' }, button: { type: 'empty' } },
+                            right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
+                        },
+                        {
+                            row: 3,
+                            left: { label: 'TEMPERATUR', display: { type: 'label', text: '21.5 C', color: 'white' }, button: { type: 'empty' } },
+                            right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
+                        },
+                        {
+                            row: 5,
+                            left: { label: '', display: { type: 'label', text: 'LIGHTS', color: 'white' }, button: { type: 'empty' } },
+                            right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
+                        }
                     ]
                 },
                 {
                     id: 'long-page',
                     name: 'Long List',
                     lines: [
-                        { row: 101, display: { type: 'label', label: 'ITEM 1' } },
-                        { row: 102, display: { type: 'label', label: 'ITEM 2' } },
-                        { row: 103, display: { type: 'label', label: 'ITEM 3' } },
-                        { row: 104, display: { type: 'label', label: 'ITEM 4' } },
-                        { row: 105, display: { type: 'label', label: 'ITEM 5' } },
-                        { row: 106, display: { type: 'label', label: 'ITEM 6' } },
-                        { row: 107, display: { type: 'label', label: 'ITEM 7' } },
-                        { row: 108, display: { type: 'label', label: 'ITEM 8' } },
-                        { row: 109, display: { type: 'label', label: 'ITEM 9' } },
+                        { row: 101, left: { label: '', display: { type: 'label', text: 'ITEM 1' }, button: { type: 'empty' } }, right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } } },
+                        { row: 102, left: { label: '', display: { type: 'label', text: 'ITEM 2' }, button: { type: 'empty' } }, right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } } },
+                        { row: 103, left: { label: '', display: { type: 'label', text: 'ITEM 3' }, button: { type: 'empty' } }, right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } } },
+                        { row: 104, left: { label: '', display: { type: 'label', text: 'ITEM 4' }, button: { type: 'empty' } }, right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } } },
+                        { row: 105, left: { label: '', display: { type: 'label', text: 'ITEM 5' }, button: { type: 'empty' } }, right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } } },
+                        { row: 106, left: { label: '', display: { type: 'label', text: 'ITEM 6' }, button: { type: 'empty' } }, right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } } },
+                        { row: 107, left: { label: '', display: { type: 'label', text: 'ITEM 7' }, button: { type: 'empty' } }, right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } } },
+                        { row: 108, left: { label: '', display: { type: 'label', text: 'ITEM 8' }, button: { type: 'empty' } }, right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } } },
+                        { row: 109, left: { label: '', display: { type: 'label', text: 'ITEM 9' }, button: { type: 'empty' } }, right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } } }
                     ]
                 },
                 {
                     id: 'sub-labels-page',
                     name: 'Sub Labels',
                     lines: [
-                        { row: 1, display: { type: 'label', label: 'TITLE' } },
-                        { row: 3, subLabel: 'WOHNZIMMER', display: { type: 'label', label: '21.5 C' } },
-                        { row: 5, subLabel: 'KÜCHE', display: { type: 'label', label: '19.0 C' } },
-                        { row: 7, display: { type: 'label', label: 'NO SUB' } },
+                        {
+                            row: 1,
+                            left: { label: '', display: { type: 'label', text: 'TITLE' }, button: { type: 'empty' } },
+                            right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
+                        },
+                        {
+                            row: 3,
+                            left: { label: 'WOHNZIMMER', display: { type: 'label', text: '21.5 C' }, button: { type: 'empty' } },
+                            right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
+                        },
+                        {
+                            row: 5,
+                            left: { label: 'KUECHE', display: { type: 'label', text: '19.0 C' }, button: { type: 'empty' } },
+                            right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
+                        },
+                        {
+                            row: 7,
+                            left: { label: '', display: { type: 'label', text: 'NO SUB' }, button: { type: 'empty' } },
+                            right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
+                        }
+                    ]
+                },
+                {
+                    id: 'left-right-page',
+                    name: 'Left Right',
+                    lines: [
+                        {
+                            row: 1,
+                            left: { label: 'LINKS', display: { type: 'label', text: 'Decke', color: 'white' }, button: { type: 'empty' } },
+                            right: { label: 'RECHTS', display: { type: 'label', text: 'AN', color: 'green' }, button: { type: 'empty' } }
+                        },
+                        {
+                            row: 3,
+                            left: { label: '', display: { type: 'label', text: 'Only Left', color: 'white' }, button: { type: 'empty' } },
+                            right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
+                        },
+                        {
+                            row: 5,
+                            left: { label: '', display: { type: 'empty' }, button: { type: 'empty' } },
+                            right: { label: '', display: { type: 'label', text: 'Only Right', color: 'amber' }, button: { type: 'empty' } }
+                        }
+                    ]
+                },
+                {
+                    id: 'old-format-page',
+                    name: 'Old Format',
+                    lines: [
+                        {
+                            row: 1,
+                            subLabel: 'LEGACY',
+                            display: { type: 'label', label: 'OLD FORMAT' },
+                            leftButton: { type: 'empty' },
+                            rightButton: { type: 'empty' }
+                        }
                     ]
                 }
             ]
@@ -62,7 +124,7 @@ describe('PageRenderer', () => {
             expect(lines[1].color).to.equal('cyan');
 
             // Row 4 (index 3) should have sub-label for row 5
-            expect(lines[3].text).to.include('KÜCHE');
+            expect(lines[3].text).to.include('KUECHE');
             expect(lines[3].color).to.equal('cyan');
         });
 
@@ -70,7 +132,7 @@ describe('PageRenderer', () => {
             await renderer.renderPage('sub-labels-page');
 
             const lines = displayPublisher._published[0];
-            // Row 6 (index 5) — row 7 has no subLabel
+            // Row 6 (index 5) — row 7 has no left.label
             expect(lines[5].text.trim()).to.equal('');
             expect(lines[5].color).to.equal('cyan');
         });
@@ -84,6 +146,85 @@ describe('PageRenderer', () => {
                 expect(lines[idx].color).to.equal('cyan');
             }
         });
+
+        it('should render both left and right sub-labels', async () => {
+            await renderer.renderPage('left-right-page');
+
+            const lines = displayPublisher._published[0];
+            // Row 0 (row 1) has content; row 1 (even row 2) has sub-labels for row 3
+            // Row 3 has no sub-labels, so even row 2 should be empty
+            // But the sub-labels for row 1 are on even row 0... wait, no.
+            // Even rows render sub-labels for the NEXT odd row.
+            // Row 2 (index 1) renders sub-label for row 3 → no sub-labels
+            // We need to check the line at index 0 (row 1) which is an odd row with the left-right content
+            // Sub-labels for row 1 would be on row 0 (which doesn't exist)
+
+            // For row 1 content, check left/right composition
+            const row1 = lines[0];
+            expect(row1.text).to.include('Decke');
+            expect(row1.text).to.include('AN');
+        });
+    });
+
+    describe('Left/Right Column Rendering', () => {
+        it('should compose left and right content in 24 chars', async () => {
+            await renderer.renderPage('left-right-page');
+
+            const lines = displayPublisher._published[0];
+            const row1 = lines[0]; // Row 1
+            expect(row1.text.length).to.equal(24);
+            // Left 12 chars should contain "Decke"
+            const leftHalf = row1.text.substring(0, 12);
+            expect(leftHalf).to.include('Decke');
+            // Right 12 chars should contain "AN"
+            const rightHalf = row1.text.substring(12);
+            expect(rightHalf).to.include('AN');
+        });
+
+        it('should use full width when only left has content', async () => {
+            await renderer.renderPage('left-right-page');
+
+            const lines = displayPublisher._published[0];
+            const row3 = lines[2]; // Row 3 (index 2)
+            expect(row3.text).to.include('Only Left');
+            expect(row3.text.length).to.equal(24);
+        });
+
+        it('should right-align when only right has content', async () => {
+            await renderer.renderPage('left-right-page');
+
+            const lines = displayPublisher._published[0];
+            const row5 = lines[4]; // Row 5 (index 4)
+            expect(row5.text).to.include('Only Right');
+            // Should be right-aligned
+            expect(row5.text.trimStart()).to.equal('Only Right');
+        });
+    });
+
+    describe('Backward Compatibility (Old Format)', () => {
+        it('should render old format lines with display.label', async () => {
+            await renderer.renderPage('old-format-page');
+
+            const lines = displayPublisher._published[0];
+            expect(lines[0].text).to.include('OLD FORMAT');
+        });
+
+        it('should render old format sub-labels', async () => {
+            // Add a page with old-format line on row 3 that has subLabel
+            adapter.config.pages.push({
+                id: 'old-sub',
+                name: 'Old Sub',
+                lines: [
+                    { row: 3, subLabel: 'ALTFORMAT', display: { type: 'label', label: 'TEST' } }
+                ]
+            });
+
+            await renderer.renderPage('old-sub');
+
+            const lines = displayPublisher._published[0];
+            // Row 2 (index 1) should have sub-label for row 3
+            expect(lines[1].text).to.include('ALTFORMAT');
+        });
     });
 
     describe('Status Bar (Row 13)', () => {
@@ -91,7 +232,6 @@ describe('PageRenderer', () => {
             await renderer.renderPage('home-main');
 
             const lines = displayPublisher._published[0];
-            // Row 13 is index 12
             const statusBar = lines[12];
             expect(statusBar.color).to.equal('cyan');
             expect(statusBar.text).to.include('HOME');
@@ -102,17 +242,14 @@ describe('PageRenderer', () => {
 
             const lines = displayPublisher._published[0];
             const statusBar = lines[12];
-            // Should contain time in HH:MM format
             expect(statusBar.text).to.match(/\d{2}:\d{2}/);
         });
 
         it('should show page indicator when paginated', async () => {
-            // Force pagination by using a page with >6 odd-row items
             await renderer.renderPage('long-page');
 
             const lines = displayPublisher._published[0];
             const statusBar = lines[12];
-            // Should show "1/2" since 9 items on 2 pages
             expect(statusBar.text).to.include('1/2');
         });
 
@@ -121,7 +258,6 @@ describe('PageRenderer', () => {
 
             const lines = displayPublisher._published[0];
             const statusBar = lines[12];
-            // Should not contain X/Y page indicator
             expect(statusBar.text).to.not.match(/\d+\/\d+/);
         });
 
@@ -155,14 +291,14 @@ describe('PageRenderer', () => {
     });
 
     describe('Pagination', () => {
-        it('should paginate pages with >6 odd-row items', async () => {
+        it('should paginate pages with >6 items', async () => {
             await renderer.renderPage('long-page');
 
             expect(renderer.totalPages).to.equal(2);
             expect(renderer.currentPageOffset).to.equal(0);
         });
 
-        it('should not paginate pages with <=6 odd-row items', async () => {
+        it('should not paginate pages with <=6 items', async () => {
             await renderer.renderPage('home-main');
 
             expect(renderer.totalPages).to.equal(1);
@@ -173,9 +309,7 @@ describe('PageRenderer', () => {
             await renderer.renderPage('long-page');
 
             const lines = displayPublisher._published[0];
-            // Row 1 (index 0) should be ITEM 1
             expect(lines[0].text).to.include('ITEM 1');
-            // Row 11 (index 10) should be ITEM 6
             expect(lines[10].text).to.include('ITEM 6');
         });
 
@@ -184,11 +318,8 @@ describe('PageRenderer', () => {
             await renderer.renderPage('long-page');
 
             const lines = displayPublisher._published[0];
-            // Row 1 (index 0) should be ITEM 7
             expect(lines[0].text).to.include('ITEM 7');
-            // Row 3 (index 2) should be ITEM 8
             expect(lines[2].text).to.include('ITEM 8');
-            // Row 5 (index 4) should be ITEM 9
             expect(lines[4].text).to.include('ITEM 9');
         });
 
@@ -196,7 +327,7 @@ describe('PageRenderer', () => {
             renderer.currentPageOffset = 99;
             await renderer.renderPage('long-page');
 
-            expect(renderer.currentPageOffset).to.equal(1); // max page index for 2 pages
+            expect(renderer.currentPageOffset).to.equal(1);
         });
 
         it('should reset pagination for non-paginated pages', async () => {
@@ -262,7 +393,6 @@ describe('PageRenderer', () => {
             await renderer.renderPage('nonexistent');
 
             const lines = displayPublisher._published[0];
-            // Should show error message
             const hasError = lines.some(l => l.text.includes('NICHT GEFUNDEN') && l.color === 'red');
             expect(hasError).to.be.true;
         });

@@ -126,10 +126,84 @@
         }
       }
     },
-    "pagesTab": {
+    "devicePagesTab": {
       "type": "panel",
-      "label": "Pages",
+      "label": "Device & Pages",
       "items": {
+        "deviceSection": {
+          "type": "panel",
+          "label": "Device Selection",
+          "items": {
+            "_deviceInfo": {
+              "type": "staticText",
+              "text": "Select a device, then load its page configuration. Edit pages below and save back to the device.",
+              "sm": 12
+            },
+            "selectedDevice": {
+              "type": "autocompleteSendTo",
+              "command": "browseDevices",
+              "label": "Device",
+              "sm": 12,
+              "md": 6
+            },
+            "loadDevicePagesBtn": {
+              "type": "sendTo",
+              "command": "loadDevicePages",
+              "jsonData": "{\"deviceId\": \"${data.selectedDevice}\"}",
+              "variant": "contained",
+              "label": "Load Config",
+              "disabled": "${!data.selectedDevice}",
+              "sm": 6,
+              "md": 3
+            },
+            "saveDevicePagesBtn": {
+              "type": "sendTo",
+              "command": "saveDevicePages",
+              "jsonData": "{\"deviceId\": \"${data.selectedDevice}\", \"pages\": ${JSON.stringify(data.pages)}}",
+              "variant": "contained",
+              "label": "Save Config",
+              "disabled": "${!data.selectedDevice}",
+              "sm": 6,
+              "md": 3
+            }
+          }
+        },
+        "_dividerTemplate": {
+          "type": "divider",
+          "text": "Templates"
+        },
+        "templateSection": {
+          "type": "panel",
+          "items": {
+            "selectedTemplate": {
+              "type": "select",
+              "label": "Template",
+              "options": [
+                {"label": "-- Select Template --", "value": ""},
+                {"label": "Home Automation", "value": "home"},
+                {"label": "Climate Control", "value": "climate"},
+                {"label": "Lighting Control", "value": "lights"}
+              ],
+              "sm": 12,
+              "md": 6
+            },
+            "loadTemplateButton": {
+              "type": "sendTo",
+              "command": "loadTemplate",
+              "jsonData": "{\"templateId\": \"${data.selectedTemplate}\"}",
+              "variant": "contained",
+              "label": "Apply Template",
+              "useNative": true,
+              "disabled": "${data.selectedTemplate === ''}",
+              "sm": 12,
+              "md": 6
+            }
+          }
+        },
+        "_dividerPages": {
+          "type": "divider",
+          "text": "Pages"
+        },
         "pages": {
           "type": "accordion",
           "label": "MCDU Pages",
@@ -140,7 +214,7 @@
               "type": "text",
               "attr": "id",
               "sm": 12,
-              "md": 6,
+              "md": 4,
               "label": "Page ID",
               "pattern": "^[a-z0-9-]+$",
               "placeholder": "home-main",
@@ -150,18 +224,19 @@
               "type": "text",
               "attr": "name",
               "sm": 12,
-              "md": 6,
+              "md": 4,
               "label": "Page Name",
               "placeholder": "Hauptmenu",
               "help": "Display name for this page"
             },
             {
-              "type": "text",
+              "type": "autocompleteSendTo",
               "attr": "parent",
-              "sm": 12,
-              "md": 6,
+              "command": "getPageList",
               "label": "Parent Page",
-              "placeholder": "home-main",
+              "sm": 12,
+              "md": 4,
+              "freeSolo": true,
               "help": "Page ID of parent page (leave empty for root page)"
             },
             {
@@ -169,7 +244,6 @@
               "attr": "lines",
               "label": "Lines Configuration",
               "sm": 12,
-              "maxRows": 14,
               "items": [
                 {
                   "type": "number",
@@ -177,67 +251,27 @@
                   "title": "Row",
                   "width": "60px",
                   "min": 1,
-                  "max": 14,
+                  "max": 13,
                   "default": 1
                 },
                 {
-                  "type": "text",
-                  "attr": "subLabel",
-                  "title": "Sub-Label",
-                  "width": "120px",
-                  "placeholder": "WOHNZIMMER"
-                },
-                {
                   "type": "panel",
-                  "attr": "leftButton",
-                  "title": "Left Button",
-                  "width": "300px",
+                  "attr": "left",
+                  "title": "Left Side",
+                  "width": "500px",
                   "items": {
-                    "type": {
-                      "type": "select",
-                      "label": "Type",
-                      "options": [
-                        {"label": "Empty", "value": "empty"},
-                        {"label": "Navigation", "value": "navigation"},
-                        {"label": "Data Point", "value": "datapoint"}
-                      ],
-                      "default": "empty"
-                    },
                     "label": {
                       "type": "text",
-                      "label": "Label",
-                      "maxLength": 10,
-                      "placeholder": "LIGHTS",
-                      "hidden": "${data.leftButton.type === 'empty'}"
+                      "label": "Sub-Label",
+                      "maxLength": 12,
+                      "placeholder": "WOHNZIMMER",
+                      "help": "Cyan sub-label on even row above (left-aligned)"
                     },
-                    "action": {
-                      "type": "select",
-                      "label": "Action",
-                      "options": [
-                        {"label": "Go To", "value": "goto"},
-                        {"label": "Toggle", "value": "toggle"},
-                        {"label": "Increment", "value": "increment"},
-                        {"label": "Decrement", "value": "decrement"}
-                      ],
-                      "default": "goto",
-                      "hidden": "${data.leftButton.type === 'empty'}"
+                    "_dividerLeftDisplay": {
+                      "type": "divider",
+                      "text": "Display"
                     },
-                    "target": {
-                      "type": "text",
-                      "label": "Target",
-                      "placeholder": "page-id or state-id",
-                      "help": "Page ID for navigation, State ID for datapoint actions",
-                      "hidden": "${data.leftButton.type === 'empty'}"
-                    }
-                  }
-                },
-                {
-                  "type": "panel",
-                  "attr": "display",
-                  "title": "Display",
-                  "width": "400px",
-                  "items": {
-                    "type": {
+                    "display.type": {
                       "type": "select",
                       "label": "Type",
                       "options": [
@@ -247,36 +281,33 @@
                       ],
                       "default": "empty"
                     },
-                    "label": {
+                    "display.text": {
                       "type": "text",
-                      "label": "Label",
-                      "maxLength": 15,
-                      "placeholder": "Living Room",
-                      "hidden": "${data.display.type === 'empty'}"
+                      "label": "Text",
+                      "maxLength": 12,
+                      "placeholder": "Deckenleuchte",
+                      "hidden": "${data.left.display.type === 'empty'}"
                     },
-                    "source": {
+                    "display.source": {
                       "type": "objectId",
                       "label": "Data Source",
                       "types": ["state"],
-                      "help": "ioBroker state to display",
-                      "hidden": "${data.display.type !== 'datapoint'}"
+                      "hidden": "${data.left.display.type !== 'datapoint'}"
                     },
-                    "format": {
+                    "display.format": {
                       "type": "text",
                       "label": "Format",
                       "placeholder": "%.1f",
-                      "help": "sprintf-style: %.2f (float), %d (int), %s (string)",
-                      "hidden": "${data.display.type !== 'datapoint'}"
+                      "hidden": "${data.left.display.type !== 'datapoint'}"
                     },
-                    "unit": {
+                    "display.unit": {
                       "type": "text",
                       "label": "Unit",
-                      "placeholder": "°C",
+                      "placeholder": "C",
                       "maxLength": 5,
-                      "help": "Unit suffix (e.g., km/h, %)",
-                      "hidden": "${data.display.type !== 'datapoint'}"
+                      "hidden": "${data.left.display.type !== 'datapoint'}"
                     },
-                    "color": {
+                    "display.color": {
                       "type": "select",
                       "label": "Color",
                       "options": [
@@ -290,87 +321,19 @@
                         {"label": "Yellow", "value": "yellow"}
                       ],
                       "default": "white",
-                      "hidden": "${data.display.type === 'empty'}"
+                      "hidden": "${data.left.display.type === 'empty'}"
                     },
-                    "align": {
-                      "type": "select",
-                      "label": "Alignment",
-                      "options": [
-                        {"label": "Left", "value": "left"},
-                        {"label": "Center", "value": "center"},
-                        {"label": "Right", "value": "right"}
-                      ],
-                      "default": "left",
-                      "hidden": "${data.display.type === 'empty'}"
-                    },
-                    "editable": {
+                    "display.editable": {
                       "type": "checkbox",
                       "label": "Editable",
                       "default": false,
-                      "help": "Allow user to edit this value via scratchpad",
-                      "hidden": "${data.display.type !== 'datapoint'}"
+                      "hidden": "${data.left.display.type !== 'datapoint'}"
                     },
-                    "inputType": {
-                      "type": "select",
-                      "label": "Input Type",
-                      "options": [
-                        {"label": "Numeric", "value": "numeric"},
-                        {"label": "Text", "value": "text"},
-                        {"label": "Time", "value": "time"},
-                        {"label": "Date", "value": "date"}
-                      ],
-                      "default": "numeric",
-                      "hidden": "${!data.display.editable}"
+                    "_dividerLeftButton": {
+                      "type": "divider",
+                      "text": "LSK Button"
                     },
-                    "validation": {
-                      "type": "panel",
-                      "label": "Validation Rules",
-                      "hidden": "${!data.display.editable}",
-                      "items": {
-                        "min": {
-                          "type": "number",
-                          "label": "Min Value",
-                          "help": "Minimum allowed value (numeric only)",
-                          "hidden": "${data.display.inputType !== 'numeric'}"
-                        },
-                        "max": {
-                          "type": "number",
-                          "label": "Max Value",
-                          "help": "Maximum allowed value (numeric only)",
-                          "hidden": "${data.display.inputType !== 'numeric'}"
-                        },
-                        "step": {
-                          "type": "number",
-                          "label": "Step",
-                          "default": 0.5,
-                          "help": "Increment/decrement step size",
-                          "hidden": "${data.display.inputType !== 'numeric'}"
-                        },
-                        "maxLength": {
-                          "type": "number",
-                          "label": "Max Length",
-                          "default": 20,
-                          "help": "Maximum character length",
-                          "hidden": "${data.display.inputType !== 'text'}"
-                        },
-                        "pattern": {
-                          "type": "text",
-                          "label": "Pattern (Regex)",
-                          "placeholder": "^[A-Z0-9]+$",
-                          "help": "Regular expression for validation",
-                          "hidden": "${data.display.inputType !== 'text'}"
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  "type": "panel",
-                  "attr": "rightButton",
-                  "title": "Right Button",
-                  "width": "300px",
-                  "items": {
-                    "type": {
+                    "button.type": {
                       "type": "select",
                       "label": "Type",
                       "options": [
@@ -380,14 +343,7 @@
                       ],
                       "default": "empty"
                     },
-                    "label": {
-                      "type": "text",
-                      "label": "Label",
-                      "maxLength": 10,
-                      "placeholder": "BACK",
-                      "hidden": "${data.rightButton.type === 'empty'}"
-                    },
-                    "action": {
+                    "button.action": {
                       "type": "select",
                       "label": "Action",
                       "options": [
@@ -397,14 +353,124 @@
                         {"label": "Decrement", "value": "decrement"}
                       ],
                       "default": "goto",
-                      "hidden": "${data.rightButton.type === 'empty'}"
+                      "hidden": "${data.left.button.type === 'empty'}"
                     },
-                    "target": {
+                    "button.target": {
                       "type": "text",
                       "label": "Target",
                       "placeholder": "page-id or state-id",
                       "help": "Page ID for navigation, State ID for datapoint actions",
-                      "hidden": "${data.rightButton.type === 'empty'}"
+                      "hidden": "${data.left.button.type === 'empty'}"
+                    }
+                  }
+                },
+                {
+                  "type": "panel",
+                  "attr": "right",
+                  "title": "Right Side",
+                  "width": "500px",
+                  "items": {
+                    "label": {
+                      "type": "text",
+                      "label": "Sub-Label",
+                      "maxLength": 12,
+                      "placeholder": "",
+                      "help": "Cyan sub-label on even row above (right-aligned)"
+                    },
+                    "_dividerRightDisplay": {
+                      "type": "divider",
+                      "text": "Display"
+                    },
+                    "display.type": {
+                      "type": "select",
+                      "label": "Type",
+                      "options": [
+                        {"label": "Empty", "value": "empty"},
+                        {"label": "Label (Static)", "value": "label"},
+                        {"label": "Data Point", "value": "datapoint"}
+                      ],
+                      "default": "empty"
+                    },
+                    "display.text": {
+                      "type": "text",
+                      "label": "Text",
+                      "maxLength": 12,
+                      "placeholder": "AN/AUS",
+                      "hidden": "${data.right.display.type === 'empty'}"
+                    },
+                    "display.source": {
+                      "type": "objectId",
+                      "label": "Data Source",
+                      "types": ["state"],
+                      "hidden": "${data.right.display.type !== 'datapoint'}"
+                    },
+                    "display.format": {
+                      "type": "text",
+                      "label": "Format",
+                      "placeholder": "%s",
+                      "hidden": "${data.right.display.type !== 'datapoint'}"
+                    },
+                    "display.unit": {
+                      "type": "text",
+                      "label": "Unit",
+                      "placeholder": "",
+                      "maxLength": 5,
+                      "hidden": "${data.right.display.type !== 'datapoint'}"
+                    },
+                    "display.color": {
+                      "type": "select",
+                      "label": "Color",
+                      "options": [
+                        {"label": "White", "value": "white"},
+                        {"label": "Green", "value": "green"},
+                        {"label": "Blue", "value": "blue"},
+                        {"label": "Amber", "value": "amber"},
+                        {"label": "Red", "value": "red"},
+                        {"label": "Magenta", "value": "magenta"},
+                        {"label": "Cyan", "value": "cyan"},
+                        {"label": "Yellow", "value": "yellow"}
+                      ],
+                      "default": "white",
+                      "hidden": "${data.right.display.type === 'empty'}"
+                    },
+                    "display.editable": {
+                      "type": "checkbox",
+                      "label": "Editable",
+                      "default": false,
+                      "hidden": "${data.right.display.type !== 'datapoint'}"
+                    },
+                    "_dividerRightButton": {
+                      "type": "divider",
+                      "text": "LSK Button"
+                    },
+                    "button.type": {
+                      "type": "select",
+                      "label": "Type",
+                      "options": [
+                        {"label": "Empty", "value": "empty"},
+                        {"label": "Navigation", "value": "navigation"},
+                        {"label": "Data Point", "value": "datapoint"}
+                      ],
+                      "default": "empty"
+                    },
+                    "button.action": {
+                      "type": "select",
+                      "label": "Action",
+                      "options": [
+                        {"label": "Go To", "value": "goto"},
+                        {"label": "Toggle", "value": "toggle"},
+                        {"label": "Increment", "value": "increment"},
+                        {"label": "Decrement", "value": "decrement"}
+                      ],
+                      "default": "goto",
+                      "hidden": "${data.right.button.type === 'empty'}"
+                    },
+                    "button.target": {
+                      "type": "text",
+                      "label": "Target",
+                      "placeholder": "page-id or state-id",
+                      "help": "Page ID for navigation, State ID for datapoint actions",
+                      "hidden": "${data.right.button.type === 'empty'}"
                     }
                   }
                 }
@@ -414,72 +480,9 @@
         }
       }
     },
-    "templatesTab": {
+    "advancedAboutTab": {
       "type": "panel",
-      "label": "Templates",
-      "items": {
-        "templatesInfo": {
-          "type": "staticText",
-          "text": "Load pre-built page configurations to get started quickly. This will add pages to your configuration without removing existing ones."
-        },
-        "_dividerTemplates": {
-          "type": "divider"
-        },
-        "selectedTemplate": {
-          "type": "select",
-          "label": "Load Template",
-          "options": [
-            {"label": "-- Select Template --", "value": ""},
-            {"label": "Home Automation", "value": "home"},
-            {"label": "Climate Control", "value": "climate"},
-            {"label": "Lighting Control", "value": "lights"}
-          ],
-          "sm": 12,
-          "md": 6
-        },
-        "loadTemplateButton": {
-          "type": "sendTo",
-          "command": "loadTemplate",
-          "jsonData": "{\"templateId\": \"${data.selectedTemplate}\"}",
-          "variant": "contained",
-          "label": "Load Template",
-          "useNative": true,
-          "disabled": "${data.selectedTemplate === ''}",
-          "sm": 12,
-          "md": 6
-        },
-        "_dividerPreview": {
-          "type": "divider",
-          "text": "Template Descriptions"
-        },
-        "templateDescriptions": {
-          "type": "staticText",
-          "text": "<strong>Home Automation:</strong> Basic smart home control with lights, climate, and security pages.<br><br><strong>Climate Control:</strong> Multi-room temperature monitoring and control with editable setpoints.<br><br><strong>Lighting Control:</strong> Room-by-room light switches with status display."
-        }
-      }
-    },
-    "devicesTab": {
-      "type": "panel",
-      "label": "Devices",
-      "items": {
-        "devicesInfo": {
-          "type": "staticText",
-          "text": "<h3>Device Auto-Discovery</h3><p>MCDU devices are automatically discovered when they connect via MQTT. Each device registers itself and creates a state tree under <code>mcdu.0.devices.{deviceId}</code>.</p><p>To see connected devices, check the ioBroker object tree under <strong>mcdu.0.devices</strong>. Device info includes hostname, IP address, online status, and last seen timestamp.</p>",
-          "sm": 12
-        },
-        "_dividerDevices": {
-          "type": "divider"
-        },
-        "_deviceHowTo": {
-          "type": "staticText",
-          "text": "<h4>Adding a New Device</h4><ol><li>Install the mcdu-client on a Raspberry Pi</li><li>Configure the MQTT broker address in the client config</li><li>Start the mcdu-client service</li><li>The device will appear automatically in the object tree</li></ol><h4>Device States</h4><ul><li><strong>info.online</strong> - Current connection status</li><li><strong>info.hostname</strong> - Device hostname</li><li><strong>info.ipAddress</strong> - Device IP address</li><li><strong>info.lastSeen</strong> - Last activity timestamp</li></ul>",
-          "sm": 12
-        }
-      }
-    },
-    "advancedTab": {
-      "type": "panel",
-      "label": "Advanced",
+      "label": "Advanced & About",
       "items": {
         "debugSettings": {
           "type": "panel",
@@ -510,33 +513,25 @@
         "exportInfo": {
           "type": "staticText",
           "text": "Use the standard ioBroker config export/import functionality to backup and restore your MCDU configuration."
-        }
-      }
-    },
-    "about": {
-      "type": "panel",
-      "label": "About",
-      "items": {
+        },
+        "_dividerAbout": {
+          "type": "divider",
+          "text": "About"
+        },
         "_description": {
           "type": "staticText",
-          "text": "<h2>ioBroker MCDU Adapter</h2><p>Aviation-inspired smart home controller using authentic MCDU (Multipurpose Control and Display Unit) interface patterns.</p><h3>Features</h3><ul><li>Authentic cockpit UX (scratchpad, LSK buttons, keypad input)</li><li>Multi-device support (each RasPi = independent device)</li><li>MQTT-based communication</li><li>Smart home integration (thermostats, lights, scenes)</li><li>Per-device page configuration</li><li>Device-specific notifications</li></ul><h3>Architecture</h3><p>Each MCDU device has its own state tree under <code>devices.{deviceId}.*</code> with channels for:</p><ul><li><strong>info</strong> - Device status (online, hostname, IP, version)</li><li><strong>display</strong> - Screen content and rendering</li><li><strong>leds</strong> - LED states (FAIL, FM, MCDU, MENU, etc.)</li><li><strong>scratchpad</strong> - Line 14 input buffer</li><li><strong>navigation</strong> - Page navigation state</li><li><strong>notifications</strong> - Device notifications</li><li><strong>actions</strong> - Control commands</li><li><strong>control</strong> - Device control (page switching, refresh)</li></ul>",
+          "text": "<h3>ioBroker MCDU Adapter</h3><p>Aviation-inspired smart home controller using authentic MCDU interface patterns.</p><h4>Display Model</h4><p>Each row has independent <strong>left</strong> and <strong>right</strong> columns, like a real MCDU. Left content is left-aligned (chars 1-12), right content is right-aligned (chars 13-24). Sub-labels appear on even rows in cyan.</p><h4>Per-Device Pages</h4><p>Page configurations are stored per device. Select a device in the Device & Pages tab, load its config, edit, and save back.</p>",
           "sm": 12
         },
         "_version": {
           "type": "staticText",
-          "text": "Version: 1.1.0",
+          "text": "Version: 2.0.0",
           "sm": 12
         },
         "_github": {
           "type": "staticLink",
           "text": "GitHub Repository",
           "href": "https://github.com/Flixhummel/mcdu",
-          "sm": 12
-        },
-        "_docs": {
-          "type": "staticLink",
-          "text": "Documentation",
-          "href": "https://github.com/Flixhummel/mcdu/blob/main/README.md",
           "sm": 12
         }
       }

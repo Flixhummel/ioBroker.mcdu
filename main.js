@@ -196,6 +196,7 @@ class McduAdapter extends utils.Adapter {
             this.subscribeStates('devices.*.notifications.*');
             this.subscribeStates('devices.*.actions.*');
             this.subscribeStates('devices.*.control.*');
+            this.subscribeStates('devices.*.config.*');
             
             // Phase 4.1: Start uptime counter
             this.startTime = Date.now();
@@ -223,45 +224,49 @@ class McduAdapter extends utils.Adapter {
     
     /**
      * Subscribe to all data sources configured in pages
+     * Supports both old (leftButton/display/rightButton) and new (left/right) line format
      */
     async subscribeToDataSources() {
         const pages = this.config.pages || [];
         let count = 0;
-        
+
+        const subscribeTo = (stateId) => {
+            if (stateId && !this.subscriptions.has(stateId)) {
+                this.subscribeForeignStates(stateId);
+                this.subscriptions.add(stateId);
+                count++;
+            }
+        };
+
         for (const page of pages) {
             const lines = page.lines || [];
             for (const line of lines) {
-                // Subscribe to display data source
-                if (line.display?.type === 'datapoint' && line.display.source) {
-                    const stateId = line.display.source;
-                    if (!this.subscriptions.has(stateId)) {
-                        this.subscribeForeignStates(stateId);
-                        this.subscriptions.add(stateId);
-                        count++;
+                // New format: left/right sides
+                if (line.left || line.right) {
+                    for (const side of [line.left, line.right]) {
+                        if (!side) continue;
+                        if (side.display?.type === 'datapoint' && side.display.source) {
+                            subscribeTo(side.display.source);
+                        }
+                        if (side.button?.type === 'datapoint' && side.button.target) {
+                            subscribeTo(side.button.target);
+                        }
                     }
-                }
-                
-                // Subscribe to button targets (for monitoring)
-                if (line.leftButton?.target && line.leftButton.type === 'datapoint') {
-                    const stateId = line.leftButton.target;
-                    if (!this.subscriptions.has(stateId)) {
-                        this.subscribeForeignStates(stateId);
-                        this.subscriptions.add(stateId);
-                        count++;
+                } else {
+                    // Old format
+                    if (line.display?.type === 'datapoint' && line.display.source) {
+                        subscribeTo(line.display.source);
                     }
-                }
-                
-                if (line.rightButton?.target && line.rightButton.type === 'datapoint') {
-                    const stateId = line.rightButton.target;
-                    if (!this.subscriptions.has(stateId)) {
-                        this.subscribeForeignStates(stateId);
-                        this.subscriptions.add(stateId);
-                        count++;
+                    if (line.leftButton?.target && line.leftButton.type === 'datapoint') {
+                        subscribeTo(line.leftButton.target);
+                    }
+                    if (line.rightButton?.target && line.rightButton.type === 'datapoint') {
+                        subscribeTo(line.rightButton.target);
                     }
                 }
             }
         }
-        
+
         this.log.info(`Subscribed to ${count} data sources`);
     }
     
@@ -796,6 +801,14 @@ class McduAdapter extends utils.Adapter {
                 case 'browseDevices':
                     this.handleBrowseDevices(obj);
                     break;
+
+                case 'loadDevicePages':
+                    this.handleLoadDevicePages(obj);
+                    break;
+
+                case 'saveDevicePages':
+                    this.handleSaveDevicePages(obj);
+                    break;
                     
                 case 'browseStates':
                     this.handleBrowseStates(obj);
@@ -913,6 +926,74 @@ class McduAdapter extends utils.Adapter {
     }
     
     /**
+     * Handle loadDevicePages command from admin UI
+     * Reads per-device page config from ioBroker object and returns it
+     * @param {object} obj - Message object with deviceId
+     */
+    async handleLoadDevicePages(obj) {
+        try {
+            const deviceId = obj.message?.deviceId;
+            if (!deviceId) {
+                this.sendTo(obj.from, obj.command, { error: 'No deviceId provided' }, obj.callback);
+                return;
+            }
+
+            const stateId = `devices.${deviceId}.config.pages`;
+            const state = await this.getStateAsync(stateId);
+            let pages = [];
+
+            if (state && state.val) {
+                try {
+                    pages = JSON.parse(state.val);
+                } catch (e) {
+                    this.log.warn(`Invalid JSON in ${stateId}: ${e.message}`);
+                    pages = [];
+                }
+            }
+
+            this.log.info(`loadDevicePages: Loaded ${pages.length} pages for device ${deviceId}`);
+            this.sendTo(obj.from, obj.command, { pages }, obj.callback);
+        } catch (error) {
+            this.log.error(`Error in loadDevicePages: ${error.message}`);
+            this.sendTo(obj.from, obj.command, { error: error.message }, obj.callback);
+        }
+    }
+
+    /**
+     * Handle saveDevicePages command from admin UI
+     * Writes page config to per-device ioBroker object
+     * @param {object} obj - Message object with deviceId and pages
+     */
+    async handleSaveDevicePages(obj) {
+        try {
+            const { deviceId, pages } = obj.message || {};
+            if (!deviceId) {
+                this.sendTo(obj.from, obj.command, { error: 'No deviceId provided' }, obj.callback);
+                return;
+            }
+            if (!Array.isArray(pages)) {
+                this.sendTo(obj.from, obj.command, { error: 'pages must be an array' }, obj.callback);
+                return;
+            }
+
+            const stateId = `devices.${deviceId}.config.pages`;
+            await this.setStateAsync(stateId, JSON.stringify(pages), true);
+
+            // Update active config if this is the active device
+            if (this.displayPublisher && this.displayPublisher.deviceId === deviceId) {
+                this.config.pages = pages;
+                await this.renderCurrentPage();
+            }
+
+            this.log.info(`saveDevicePages: Saved ${pages.length} pages for device ${deviceId}`);
+            this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
+        } catch (error) {
+            this.log.error(`Error in saveDevicePages: ${error.message}`);
+            this.sendTo(obj.from, obj.command, { error: error.message }, obj.callback);
+        }
+    }
+
+    /**
      * Handle browseStates command from admin UI
      * Returns list of all ioBroker states for selection in UI
      * @param {object} obj - Message object with optional filter
@@ -1021,6 +1102,9 @@ class McduAdapter extends utils.Adapter {
                 
                 this.log.debug(`Updated existing device: ${deviceId}`);
 
+                // Load device pages into active config
+                await this.loadDevicePagesIntoConfig(deviceId);
+
                 // Set device for display publishing and show splash
                 this.displayPublisher.setDevice(deviceId);
                 this.displayPublisher.lastContent = null;
@@ -1051,6 +1135,12 @@ class McduAdapter extends utils.Adapter {
                 
                 this.log.debug(`Created ioBroker objects for device ${deviceId}`);
 
+                // Migration: if device has no pages yet, copy from native.pages
+                await this.migrateDevicePages(deviceId);
+
+                // Load device pages into active config
+                await this.loadDevicePagesIntoConfig(deviceId);
+
                 // Set device for display publishing and show splash
                 this.displayPublisher.setDevice(deviceId);
                 this.displayPublisher.lastContent = null;
@@ -1068,6 +1158,47 @@ class McduAdapter extends utils.Adapter {
         }
     }
     
+    /**
+     * Migrate native.pages to device's config.pages (one-time migration)
+     * @param {string} deviceId - Device ID
+     */
+    async migrateDevicePages(deviceId) {
+        try {
+            const state = await this.getStateAsync(`devices.${deviceId}.config.pages`);
+            const hasDevicePages = state && state.val && state.val !== '[]';
+
+            if (!hasDevicePages && this.config.pages && this.config.pages.length > 0) {
+                this.log.info(`Migrating ${this.config.pages.length} pages from native.pages to device ${deviceId}`);
+                await this.setStateAsync(
+                    `devices.${deviceId}.config.pages`,
+                    JSON.stringify(this.config.pages),
+                    true
+                );
+            }
+        } catch (error) {
+            this.log.error(`Migration failed for device ${deviceId}: ${error.message}`);
+        }
+    }
+
+    /**
+     * Load device's pages into active config
+     * @param {string} deviceId - Device ID
+     */
+    async loadDevicePagesIntoConfig(deviceId) {
+        try {
+            const state = await this.getStateAsync(`devices.${deviceId}.config.pages`);
+            if (state && state.val) {
+                const pages = JSON.parse(state.val);
+                if (Array.isArray(pages) && pages.length > 0) {
+                    this.config.pages = pages;
+                    this.log.info(`Loaded ${pages.length} pages from device ${deviceId}`);
+                }
+            }
+        } catch (error) {
+            this.log.error(`Failed to load pages from device ${deviceId}: ${error.message}`);
+        }
+    }
+
     /**
      * Called when adapter shuts down
      * Comprehensive cleanup to prevent memory leaks
