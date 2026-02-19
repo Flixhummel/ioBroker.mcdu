@@ -1446,18 +1446,27 @@ class McduAdapter extends utils.Adapter {
                 }
             }
 
-            // Also load function keys
+            // Also load function keys (fall back to native if device has none)
             const fkState = await this.getStateAsync(`devices.${deviceId}.config.functionKeys`);
+            let fks = [];
             if (fkState && fkState.val) {
                 try {
-                    const fks = JSON.parse(fkState.val);
-                    if (Array.isArray(fks) && fks.length > 0) {
-                        this.config.functionKeys = fks;
-                        this.log.info(`Loaded ${fks.length} function keys from device ${deviceId}`);
-                    }
+                    fks = JSON.parse(fkState.val);
                 } catch (e) {
                     this.log.warn(`Invalid function keys JSON for device ${deviceId}: ${e.message}`);
                 }
+            }
+            if (Array.isArray(fks) && fks.length > 0) {
+                this.config.functionKeys = fks;
+                this.log.info(`Loaded ${fks.length} function keys from device ${deviceId}`);
+            } else if (this.config.functionKeys && this.config.functionKeys.length > 0) {
+                // Device has no FK stored — keep native defaults and persist them
+                this.log.info(`No function keys on device ${deviceId}, using native defaults and persisting`);
+                await this.setStateAsync(
+                    `devices.${deviceId}.config.functionKeys`,
+                    JSON.stringify(this.config.functionKeys),
+                    true
+                );
             }
         } catch (error) {
             this.log.error(`Failed to load pages from device ${deviceId}: ${error.message}`);
