@@ -61,7 +61,7 @@
               "type": "number",
               "label": "Columns",
               "default": 24,
-              "disabled": true,
+              "disabled": "true",
               "help": "Fixed by hardware",
               "sm": 12,
               "md": 4
@@ -70,7 +70,7 @@
               "type": "number",
               "label": "Rows",
               "default": 14,
-              "disabled": true,
+              "disabled": "true",
               "help": "Fixed by hardware",
               "sm": 12,
               "md": 4
