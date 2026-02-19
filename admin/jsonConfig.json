@@ -139,7 +139,7 @@
               "sm": 12
             },
             "selectedDevice": {
-              "type": "autocompleteSendTo",
+              "type": "selectSendTo",
               "command": "browseDevices",
               "label": "Device",
               "sm": 12,
