@@ -2,7 +2,9 @@
 
 Complete project documentation for the MCDU (Multipurpose Control and Display Unit) smart home adapter.
 
-## 📁 Documentation Structure
+**Current Status (2026-02-19):** Adapter Phase 3 (Business Logic) complete. 109 tests passing. Phases 4 (Admin UI) and 5 (Hardware Deployment) remain.
+
+## Documentation Structure
 
 ### `/architecture/`
 Architecture decisions and system design:
@@ -13,7 +15,7 @@ Architecture decisions and system design:
 
 ### `/implementation/`
 Implementation plans and technical designs:
-- **IMPLEMENTATION-PLAN.md** - Step-by-step implementation guide
+- **IMPLEMENTATION-PLAN.md** - Step-by-step implementation guide (Phases 1-5)
 - **JSONCONFIG-PLAN.md** - Admin UI configuration design
 - **TEMPLATES-DESIGN.md** - Page template system
 - **ADAPTER-PLAN.md** - Original adapter planning
@@ -27,16 +29,18 @@ Research, requirements, and analysis:
 
 ### `/phases/`
 Phase-by-phase delivery reports:
+- **PROGRESS.md** - Overall progress tracking (start here for status)
+- **STATUS-SUMMARY.md** - Current status with architecture diagram and module overview
 - **PHASE1-DELIVERY-REPORT.md** - Hardware + MQTT client
 - **PHASE2-DELIVERY-REPORT.md** - Button mapping + protocols
 - **PHASE2-SUMMARY.md** - Phase 2 summary
 - **PHASE3A-SPEC.md** - MQTT protocol specification
 - **PHASE3A-COMPLETE.md** - Phase 3A completion
-- **PHASE4-DELIVERY-REPORT.md** - Automation states
-- **PHASE-4.1-IMPLEMENTATION-SUMMARY.md** - Extended automation
+- **PHASE3A-COMPLETED.md** - Phase 3A final status
+- **PHASE3A-LESSONS-LEARNED.md** - Bugs and learnings from 3A
+- **PHASE4-DELIVERY-REPORT.md** - Admin UI and automation states
+- **PHASE-4.1-IMPLEMENTATION-SUMMARY.md** - Extended automation (32 new states)
 - **DEPLOYMENT-COMPLETE.md** - Deployment status
-- **PROGRESS.md** - Overall progress tracking
-- **STATUS-SUMMARY.md** - Current status
 - **READY-FOR-PUBLISHING.md** - Publishing checklist
 
 ### `/ux-concept/`
@@ -51,23 +55,22 @@ UX design and user experience documentation:
 - **INTEGRATION-SUMMARY.md** - Integration overview
 - **MQTT-TEST-COMMANDS.md** - MQTT testing commands
 - **MULTI-COLOR-FEATURE.md** - Multi-color display feature
+- **PAGE-CONFIGURATION-GUIDE.md** - Page configuration reference
 
-## 🚀 Quick Links
+## Quick Links
 
+- **Current Status:** [phases/PROGRESS.md](./phases/PROGRESS.md)
 - **Start Here:** [GETTING-STARTED.md](./GETTING-STARTED.md)
 - **Architecture Overview:** [architecture/ARCHITECTURE-REVISION.md](./architecture/ARCHITECTURE-REVISION.md)
-- **Latest Implementation Plan:** [implementation/IMPLEMENTATION-PLAN.md](./implementation/IMPLEMENTATION-PLAN.md)
+- **Implementation Plan:** [implementation/IMPLEMENTATION-PLAN.md](./implementation/IMPLEMENTATION-PLAN.md)
 - **UX Design:** [ux-concept/UX-CONCEPT.md](./ux-concept/UX-CONCEPT.md)
 
-## 📊 Project Status
-
-See [phases/READY-FOR-PUBLISHING.md](./phases/READY-FOR-PUBLISHING.md) for current status and publishing checklist.
-
-## 🔧 Technical Documentation
+## Technical Documentation
 
 Main repository README: [../README.md](../README.md)
 
 For adapter code documentation, see:
-- `/lib/` - Core library modules
+- `/lib/` - Core library modules (mqtt, rendering, input, state, templates)
 - `/mcdu-client/` - Raspberry Pi client
 - `/admin/` - Admin UI configuration
+- `/test/unit/` - Unit tests (109 tests)

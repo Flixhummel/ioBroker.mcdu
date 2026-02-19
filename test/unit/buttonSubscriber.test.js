@@ -1,0 +1,246 @@
+'use strict';
+
+const { expect } = require('chai');
+const ButtonSubscriber = require('../../lib/mqtt/ButtonSubscriber');
+const { createMockAdapter, createMockMqttClient } = require('./testHelper');
+
+describe('ButtonSubscriber', () => {
+    let adapter;
+    let mqttClient;
+    let subscriber;
+
+    beforeEach(() => {
+        adapter = createMockAdapter({
+            pages: [
+                {
+                    id: 'home-main',
+                    name: 'Home',
+                    lines: [
+                        {
+                            row: 1,
+                            leftButton: { type: 'navigation', action: 'goto', target: 'lights-main' },
+                            display: { type: 'label', label: 'LIGHTS' },
+                            rightButton: { type: 'empty' }
+                        },
+                        {
+                            row: 3,
+                            leftButton: { type: 'empty' },
+                            display: { type: 'label', label: 'CLIMATE' },
+                            rightButton: { type: 'navigation', action: 'goto', target: 'climate-main' }
+                        }
+                    ]
+                },
+                { id: 'lights-main', name: 'Lights', lines: [] },
+                { id: 'climate-main', name: 'Climate', lines: [] },
+                { id: 'status-main', name: 'Status', lines: [] },
+                { id: 'scenes-main', name: 'Scenes', lines: [] }
+            ]
+        });
+        mqttClient = createMockMqttClient();
+        subscriber = new ButtonSubscriber(adapter, mqttClient);
+    });
+
+    describe('Button Row Mapping', () => {
+        it('should map LSK1L to row 1', () => {
+            expect(subscriber.buttonRowMap.get('LSK1L')).to.equal(1);
+        });
+
+        it('should map LSK1R to row 1', () => {
+            expect(subscriber.buttonRowMap.get('LSK1R')).to.equal(1);
+        });
+
+        it('should map LSK6L to row 11', () => {
+            expect(subscriber.buttonRowMap.get('LSK6L')).to.equal(11);
+        });
+
+        it('should map all 12 LSK buttons', () => {
+            expect(subscriber.buttonRowMap.size).to.equal(12);
+        });
+
+        it('should follow LSK-to-odd-row formula', () => {
+            for (let i = 1; i <= 6; i++) {
+                const expectedRow = (i * 2) - 1;
+                expect(subscriber.buttonRowMap.get(`LSK${i}L`)).to.equal(expectedRow);
+                expect(subscriber.buttonRowMap.get(`LSK${i}R`)).to.equal(expectedRow);
+            }
+        });
+    });
+
+    describe('Keypad Mapping', () => {
+        it('should map numeric keys 0-9', () => {
+            for (let i = 0; i <= 9; i++) {
+                expect(subscriber.keypadMap.get(`KEY_${i}`)).to.equal(String(i));
+            }
+        });
+
+        it('should map alphabetic keys', () => {
+            expect(subscriber.keypadMap.get('KEY_A')).to.equal('A');
+            expect(subscriber.keypadMap.get('KEY_Z')).to.equal('Z');
+        });
+
+        it('should map special characters', () => {
+            expect(subscriber.keypadMap.get('KEY_DOT')).to.equal('.');
+            expect(subscriber.keypadMap.get('KEY_SLASH')).to.equal('/');
+            expect(subscriber.keypadMap.get('KEY_SPACE')).to.equal(' ');
+        });
+    });
+
+    describe('Function Key Detection', () => {
+        it('should recognize MENU as function key', () => {
+            expect(subscriber.isFunctionKey('MENU')).to.be.true;
+        });
+
+        it('should recognize INIT as function key', () => {
+            expect(subscriber.isFunctionKey('INIT')).to.be.true;
+        });
+
+        it('should recognize DIR as function key', () => {
+            expect(subscriber.isFunctionKey('DIR')).to.be.true;
+        });
+
+        it('should recognize PREV_PAGE and NEXT_PAGE', () => {
+            expect(subscriber.isFunctionKey('PREV_PAGE')).to.be.true;
+            expect(subscriber.isFunctionKey('NEXT_PAGE')).to.be.true;
+        });
+
+        it('should recognize FPLN and PERF', () => {
+            expect(subscriber.isFunctionKey('FPLN')).to.be.true;
+            expect(subscriber.isFunctionKey('PERF')).to.be.true;
+        });
+
+        it('should not recognize LSK as function key', () => {
+            expect(subscriber.isFunctionKey('LSK1L')).to.be.false;
+        });
+
+        it('should not recognize CLR as function key', () => {
+            expect(subscriber.isFunctionKey('CLR')).to.be.false;
+        });
+
+        it('should not recognize OVFY as function key', () => {
+            expect(subscriber.isFunctionKey('OVFY')).to.be.false;
+        });
+    });
+
+    describe('handleFunctionKey', () => {
+        it('should call navigateHome on MENU', async () => {
+            let called = false;
+            adapter.navigateHome = async () => { called = true; };
+
+            await subscriber.handleFunctionKey('MENU');
+            expect(called).to.be.true;
+        });
+
+        it('should navigate to status page on INIT', async () => {
+            let switchedTo = null;
+            adapter.switchToPage = async (id) => { switchedTo = id; };
+
+            await subscriber.handleFunctionKey('INIT');
+            expect(switchedTo).to.equal('status-main');
+        });
+
+        it('should navigate to scenes page on FPLN', async () => {
+            let switchedTo = null;
+            adapter.switchToPage = async (id) => { switchedTo = id; };
+
+            await subscriber.handleFunctionKey('FPLN');
+            expect(switchedTo).to.equal('scenes-main');
+        });
+    });
+
+    describe('handleButtonEvent', () => {
+        it('should ignore release events', async () => {
+            let actionCalled = false;
+            adapter.switchToPage = async () => { actionCalled = true; };
+
+            const topic = 'mcdu/test-device/buttons/event';
+            const message = Buffer.from(JSON.stringify({
+                button: 'MENU',
+                action: 'release',
+                timestamp: Date.now()
+            }));
+
+            await subscriber.handleButtonEvent(topic, message);
+            expect(actionCalled).to.be.false;
+        });
+
+        it('should extract deviceId from topic', async () => {
+            const topic = 'mcdu/my-device-123/buttons/event';
+            const message = Buffer.from(JSON.stringify({
+                button: 'MENU',
+                action: 'press',
+                timestamp: Date.now()
+            }));
+
+            let homeCalled = false;
+            adapter.navigateHome = async () => { homeCalled = true; };
+
+            await subscriber.handleButtonEvent(topic, message);
+            expect(homeCalled).to.be.true;
+        });
+
+        it('should debounce rapid presses', async () => {
+            let callCount = 0;
+            adapter.navigateHome = async () => { callCount++; };
+
+            const topic = 'mcdu/test-device/buttons/event';
+            const msg = () => Buffer.from(JSON.stringify({
+                button: 'MENU',
+                action: 'press',
+                timestamp: Date.now()
+            }));
+
+            subscriber.lastButtonPress = Date.now(); // simulate recent press
+
+            await subscriber.handleButtonEvent(topic, msg());
+            expect(callCount).to.equal(0); // debounced
+        });
+    });
+
+    describe('Subscribe', () => {
+        it('should subscribe to button events and keypad events', async () => {
+            await subscriber.subscribe();
+
+            expect(mqttClient._subscriptions).to.have.length(2);
+            expect(mqttClient._subscriptions[0].topic).to.equal('+/buttons/event');
+            expect(mqttClient._subscriptions[1].topic).to.equal('+/buttons/keypad');
+        });
+    });
+
+    describe('Edit Mode Clearing', () => {
+        it('should clear edit mode on function keys except PREV/NEXT PAGE', async () => {
+            const inputModeManager = {
+                getMode: () => 'edit',
+                setState: async () => {},
+                getScratchpad: () => ({ getContent: () => '', clear: () => {} })
+            };
+            subscriber.setInputModeManager(inputModeManager);
+
+            let modeSet = null;
+            inputModeManager.setState = async (mode) => { modeSet = mode; };
+
+            adapter.navigateHome = async () => {};
+            await subscriber.handleFunctionKey('MENU');
+            expect(modeSet).to.equal('normal');
+        });
+
+        it('should NOT clear edit mode on PREV_PAGE', async () => {
+            const inputModeManager = {
+                getMode: () => 'edit',
+                setState: async () => {},
+                getScratchpad: () => ({ getContent: () => '', clear: () => {} })
+            };
+            subscriber.setInputModeManager(inputModeManager);
+
+            let modeSet = null;
+            inputModeManager.setState = async (mode) => { modeSet = mode; };
+
+            // Set up pageRenderer mock
+            adapter.pageRenderer = { currentPageOffset: 0, totalPages: 1 };
+            adapter.renderCurrentPage = async () => {};
+            adapter.navigatePrevious = async () => {};
+
+            await subscriber.handleFunctionKey('PREV_PAGE');
+            expect(modeSet).to.be.null; // not called
+        });
+    });
+});
