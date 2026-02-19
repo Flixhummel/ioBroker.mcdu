@@ -203,6 +203,15 @@ class McduAdapter extends utils.Adapter {
                 const uptimeSeconds = Math.floor((Date.now() - this.startTime) / 1000);
                 this.setStateAsync('runtime.uptime', uptimeSeconds, true);
             }, 60000); // Update every minute
+
+            // Live data re-render timer (status bar time + datapoint refresh)
+            const reRenderInterval = this.config.performance?.reRenderInterval || 30000;
+            this.reRenderInterval = setInterval(() => {
+                this.renderCurrentPage().catch(error => {
+                    this.log.error(`Periodic re-render failed: ${error.message}`);
+                });
+            }, reRenderInterval);
+            this.log.debug(`Live re-render interval started (${reRenderInterval}ms)`);
             
             this.log.info('✅ MCDU Adapter ready!');
             
@@ -579,6 +588,51 @@ class McduAdapter extends utils.Adapter {
         }
     }
     
+    /**
+     * Show startup splash screen on device connect
+     * Displays for 3 seconds, then navigates to home page
+     * @param {string} deviceId - Device ID
+     * @returns {Promise<void>}
+     */
+    async showSplashScreen(deviceId) {
+        if (!this.displayPublisher) return;
+
+        const version = require('./package.json').version || '0.0.0';
+        const now = new Date();
+        const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+        const blank = { text: ' '.repeat(24), color: 'white' };
+        const lines = [
+            { text: '    MCDU SMART HOME     ', color: 'cyan' },    // 1
+            blank,                                                     // 2
+            blank,                                                     // 3
+            blank,                                                     // 4
+            blank,                                                     // 5
+            blank,                                                     // 6
+            { text: '     INITIALIZING       ', color: 'amber' },   // 7
+            blank,                                                     // 8
+            blank,                                                     // 9
+            blank,                                                     // 10
+            blank,                                                     // 11
+            blank,                                                     // 12
+            { text: `   v${version}   ${time}  `.substring(0, 24).padEnd(24), color: 'white' }, // 13
+            { text: '________________________', color: 'white' },   // 14
+        ];
+
+        await this.displayPublisher.publishFullDisplay(lines);
+        this.log.info(`Splash screen shown on ${deviceId}`);
+
+        // After 3 seconds, render home page
+        setTimeout(async () => {
+            try {
+                this.displayPublisher.lastContent = null; // Force re-render
+                await this.renderCurrentPage();
+            } catch (error) {
+                this.log.error(`Post-splash render failed: ${error.message}`);
+            }
+        }, 3000);
+    }
+
     /**
      * Handle LED state change
      * @param {string} ledName - LED name
@@ -967,10 +1021,10 @@ class McduAdapter extends utils.Adapter {
                 
                 this.log.debug(`Updated existing device: ${deviceId}`);
 
-                // Set device for display publishing and force re-render
+                // Set device for display publishing and show splash
                 this.displayPublisher.setDevice(deviceId);
                 this.displayPublisher.lastContent = null;
-                await this.renderCurrentPage();
+                await this.showSplashScreen(deviceId);
 
                 // Update lastSeen state
                 await this.setStateAsync(`devices.${deviceId}.lastSeen`, Date.now(), true);
@@ -997,10 +1051,10 @@ class McduAdapter extends utils.Adapter {
                 
                 this.log.debug(`Created ioBroker objects for device ${deviceId}`);
 
-                // Set device for display publishing and force initial render
+                // Set device for display publishing and show splash
                 this.displayPublisher.setDevice(deviceId);
                 this.displayPublisher.lastContent = null;
-                await this.renderCurrentPage();
+                await this.showSplashScreen(deviceId);
             }
             
             // Update devices online count
@@ -1034,6 +1088,12 @@ class McduAdapter extends utils.Adapter {
                 clearInterval(this.uptimeInterval);
                 this.uptimeInterval = null;
                 this.log.debug('Uptime interval cleared');
+            }
+
+            if (this.reRenderInterval) {
+                clearInterval(this.reRenderInterval);
+                this.reRenderInterval = null;
+                this.log.debug('Re-render interval cleared');
             }
             
             // Phase 2: Clear confirmation dialog countdown timers

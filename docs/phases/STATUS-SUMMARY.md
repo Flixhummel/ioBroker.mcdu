@@ -1,7 +1,7 @@
 # MCDU Smart Home Controller - Status Summary
 
-**Last Updated:** 2026-02-14 22:50 CET  
-**Overall Status:** ✅ Phase 3a Complete - Production-Ready MQTT Client  
+**Last Updated:** 2026-02-19
+**Overall Status:** Adapter Phase 3 (Business Logic) Complete -- 109 tests passing
 
 ---
 
@@ -9,178 +9,131 @@
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| **Hardware** | ✅ Verified | MCDU-32-CAPTAIN fully functional |
-| **Node.js Driver** | ✅ Complete | mcdu.js with per-line colors + brightness |
-| **RasPi MQTT Client** | ✅ Deployed | Running on Pi 1 Model B Rev 2 |
-| **MQTT Integration** | ✅ Working | Broker: 10.10.5.149:1883 |
-| **Display Control** | ✅ Working | Text + per-character colors (8 colors, multi-color segments per line) |
-| **Button Events** | ✅ Working | All 73 buttons publishing to MQTT |
-| **LED Control** | ✅ Working | 11 LEDs + brightness control (0-255) |
-| **Auto-Start Service** | ✅ Working | systemd with restart on failure |
-| **ioBroker Adapter** | ⏭️ Not Started | Phase 3b next |
+| **Hardware** | DONE | MCDU-32-CAPTAIN fully functional |
+| **Node.js Driver** | DONE | mcdu.js with per-line colors + brightness |
+| **RasPi MQTT Client** | DONE | Running on Pi 1 Model B Rev 2 |
+| **MQTT Integration** | DONE | Broker: 10.10.5.149:1883 |
+| **ioBroker Adapter Foundation** | DONE | main.js, state tree, MQTT client |
+| **Input System** | DONE | Scratchpad, validation, confirmation dialogs |
+| **Business Logic (Phase 3)** | DONE | Rendering, pagination, function keys, splash |
+| **Unit Tests** | DONE | 109 tests passing |
+| **Admin UI Redesign** | NOT STARTED | Phase 4 |
+| **Template Enhancement** | NOT STARTED | Phase 4 |
+| **Hardware Deployment Test** | NOT STARTED | Phase 5 |
 
 ---
 
-## What You Can Do Right Now
+## What Was Just Completed (2026-02-19)
 
-### 1. Send Text to Display
-```bash
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] \
-  -t mcdu/display/line \
-  -m '{"lineNumber":1,"text":"SMART HOME READY!    ","color":"green"}'
-```
+Adapter Phase 3: Business Logic -- all 8 steps implemented.
 
-### 2. See Button Presses
-```bash
-mosquitto_sub -h 10.10.5.149 -p 1883 -u iobroker -P [password] \
-  -t mcdu/buttons/event -v
-```
-Press any button on the MCDU → Event appears instantly!
+### Rendering Improvements
+- **Even Row Sub-Labels** (Step 3.1): Cyan sub-labels on rows 2/4/6/8/10 sourced from the next odd row's `subLabel` field
+- **Status Bar** (Step 3.2): Row 13 dedicated to page name + pagination + HH:MM time
+- **Page Pagination** (Step 3.4): Auto-splits pages with >6 items into sub-pages with X/Y indicator
 
-### 3. Control LEDs
-```bash
-# Turn on RDY indicator
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] \
-  -t mcdu/leds/single \
-  -m '{"name":"RDY","state":true}'
+### Navigation and Input
+- **Function Key Handling** (Step 3.3): MENU, INIT, DIR, PREV_PAGE, NEXT_PAGE, FPLN, PERF all routed
+- **ASCII-Safe Messages** (Step 3.7): All messages use ASCII-only characters for MCDU compatibility
 
-# Adjust screen brightness
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] \
-  -t mcdu/leds/single \
-  -m '{"name":"SCREEN_BACKLIGHT","brightness":255}'
-```
+### System Features
+- **Live Data Re-Rendering** (Step 3.5): Periodic timer refreshes display (default 30s, configurable)
+- **Startup Splash Screen** (Step 3.6): Branded splash for 3 seconds on device connection
 
-### 4. Full Display Page Example
-```bash
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] \
-  -t mcdu/display/set -m '{
-  "lines": [
-    {"text":"SMART HOME MCDU      ","color":"white"},
-    {"text":"                     ","color":"white"},
-    {"text":"<LIGHTS      STATUS> ","color":"amber"},
-    {"text":"<CLIMATE       TEMP> ","color":"amber"},
-    {"text":"<SECURITY     ALARM> ","color":"amber"},
-    {"text":"                     ","color":"white"},
-    {"text":"SYSTEM READY         ","color":"green"},
-    {"text":"                     ","color":"white"},
-    {"text":"                     ","color":"white"},
-    {"text":"                     ","color":"white"},
-    {"text":"                     ","color":"white"},
-    {"text":"                     ","color":"white"},
-    {"text":"<PREV         NEXT>  ","color":"green"},
-    {"text":"                     ","color":"white"}
-  ]
-}'
-```
+### Testing
+- **Unit Tests** (Step 3.8): 59 new tests across 3 new test files, total now 109
 
 ---
 
 ## Current Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    YOUR MAC / PC                        │
-│                                                         │
-│  mosquitto_pub / mosquitto_sub                          │
-│  (Send commands, monitor events)                        │
-└──────────────────┬──────────────────────────────────────┘
-                   │
-                   │ MQTT (10.10.5.149:1883)
-                   │
-        ┌──────────▼──────────┐
-        │   MQTT Broker       │
-        │   (Mosquitto)       │
-        └──────────┬──────────┘
-                   │
-                   │ MQTT Topics
-                   │ mcdu/display/*
-                   │ mcdu/leds/*
-                   │ mcdu/buttons/event
-                   │ mcdu/status/*
-                   │
-        ┌──────────▼──────────────────────────┐
-        │  Raspberry Pi 1 Model B Rev 2       │
-        │  IP: 10.10.2.190                    │
-        │                                     │
-        │  ┌───────────────────────────────┐  │
-        │  │  mcdu-client.js               │  │
-        │  │  (systemd service)            │  │
-        │  │                               │  │
-        │  │  • MQTT client                │  │
-        │  │  • Display rendering          │  │
-        │  │  • Button polling (50Hz)      │  │
-        │  │  • LED control                │  │
-        │  └───────────┬───────────────────┘  │
-        │              │                      │
-        │              │ USB HID              │
-        │              ▼                      │
-        │  ┌───────────────────────────────┐  │
-        │  │  mcdu.js (hardware driver)    │  │
-        │  └───────────┬───────────────────┘  │
-        └──────────────┼──────────────────────┘
-                       │
-                       │ USB
-                       ▼
-            ┌──────────────────────┐
-            │   MCDU-32-CAPTAIN    │
-            │   (Hardware)         │
-            │                      │
-            │  • 14×24 Display     │
-            │  • 73 Buttons        │
-            │  • 11 LEDs           │
-            └──────────────────────┘
++-----------------------------------------------------------+
+|                    ioBroker Server                         |
+|                                                           |
+|  +-------------------------------------------------+     |
+|  |  iobroker.mcdu adapter (main.js)                |     |
+|  |                                                 |     |
+|  |  lib/mqtt/          - MQTT client, button sub   |     |
+|  |  lib/rendering/     - Page renderer, display    |     |
+|  |  lib/input/         - Scratchpad, validation    |     |
+|  |  lib/state/         - State tree management     |     |
+|  |  lib/templates/     - Template loader           |     |
+|  +-----------------------+-------------------------+     |
++--------------------------|------------------------------+
+                           | MQTT (10.10.5.149:1883)
+                           |
+              +------------+------------+
+              |   Mosquitto Broker      |
+              +------------+------------+
+                           |
+              +------------+---------------------------+
+              |  Raspberry Pi 1 Model B Rev 2          |
+              |  IP: 10.10.2.190                       |
+              |                                        |
+              |  mcdu-client.js (systemd service)      |
+              |    - MQTT client                       |
+              |    - Display rendering                 |
+              |    - Button polling (50Hz)             |
+              |    - LED control                       |
+              |              |                         |
+              |              | USB HID                 |
+              |              v                         |
+              |    MCDU-32-CAPTAIN Hardware             |
+              |    14x24 display, 73 buttons, 11 LEDs  |
+              +----------------------------------------+
 ```
 
 ---
 
-## Project Timeline
+## Adapter Module Overview
 
-### Completed Phases ✅
+| Module | File | Purpose |
+|--------|------|---------|
+| MQTT Client | `lib/mqtt/MqttClient.js` | Broker connection, pub/sub, auto-reconnect |
+| Button Subscriber | `lib/mqtt/ButtonSubscriber.js` | Button events, LSK mapping, function keys |
+| State Tree | `lib/state/StateTreeManager.js` | ioBroker object tree, device registration |
+| Page Renderer | `lib/rendering/PageRenderer.js` | Page config to 14x24 display, sub-labels, pagination |
+| Display Publisher | `lib/rendering/DisplayPublisher.js` | MQTT display publishing, throttled (max 10/sec) |
+| Scratchpad | `lib/input/ScratchpadManager.js` | Line 14 buffer, char input, validation display |
+| Input Mode | `lib/input/InputModeManager.js` | State machine: normal, input, edit, confirm |
+| Confirmation | `lib/input/ConfirmationDialog.js` | Soft (LSK) vs hard (OVFY) confirmation dialogs |
+| Validation | `lib/input/ValidationEngine.js` | Keystroke, format, range, business validation |
+| Templates | `lib/templates/TemplateLoader.js` | Pre-built page templates, template merging |
 
-**Phase 1: Hardware Testing** (2h - 2026-02-14)
-- Protocol reverse-engineered
-- All hardware verified (display, buttons, LEDs)
-- Python test scripts created
-- Documentation: HARDWARE-TEST-RESULTS.md
+---
 
-**Phase 2: Node.js Driver** (4h - 2026-02-14)
-- CRITICAL BREAKTHROUGH: Full-screen buffer approach
-- mcdu.js driver complete (10.7KB)
-- All 8 colors working
-- API documentation
-- Documentation: PHASE2-COMPLETE.md, PROTOCOL-FINDINGS.md
+## Test Summary
 
-**Phase 2.5: Physical Mapping** (20min - 2026-02-14)
-- 73 buttons mapped to standard MCDU labels
-- button-map.json created
-- LED discovery: Names match protocol exactly
-- Documentation: PHASE2.5-COMPLETE.md, BUTTON-MAPPING.md
+```
+npm test    -- runs all 109 tests
 
-**Phase 3: Architecture Decision** (30min - 2026-02-14)
-- Analyzed Lovelace, Zigbee, Tasmota patterns
-- MQTT-based hybrid architecture approved
-- RasPi = "dumb terminal", ioBroker = "smart server"
-- Documentation: ARCHITECTURE-DECISION.md (12.6KB)
+test/unit/pageRenderer.test.js       30 tests  (sub-labels, status bar, pagination)
+test/unit/buttonSubscriber.test.js   19 tests  (button mapping, keypad, function keys)
+test/unit/asciiSafeMessages.test.js  10 tests  (ASCII-safe messages)
+test/unit/ScratchpadManager.test.js  (scratchpad operations)
+test/integration/                    (adapter startup tests)
+test/package/                        (package validation)
+```
 
-**Phase 3a: RasPi MQTT Client** (3h - 2026-02-14)
-- **Specification:** PHASE3A-SPEC.md (21.5KB) - Contract-first design
-- **Implementation:** mcdu-client.js (~550 lines)
-- **Deployment:** Raspberry Pi 1 Model B Rev 2
-- **Bugs Fixed:** 5 critical issues resolved
-- **Status:** Production-ready, running as systemd service
-- **Documentation:** PHASE3A-COMPLETE.md, PHASE3A-LESSONS-LEARNED.md
+---
 
-### Current Phase ⏸️
+## What Remains
 
-**Phase 3b: ioBroker Adapter** (Not Started)
-- Template system (pre-built MCDU pages)
-- State subscriptions (ioBroker → MCDU)
-- Button handlers (MCDU → ioBroker)
-- JSON Config UI
-- Multi-MCDU support
+### Adapter Phase 4: Admin UI Redesign
+- Restructure `admin/jsonConfig.json` for better usability
+- Not yet started
 
-**Estimated Time:** 2-3 days  
-**Prerequisites:** All met ✅
+### Adapter Phase 4 (continued): Template System Enhancement
+- State ID mapping (display fields to real ioBroker state IDs)
+- Template preview functionality
+- Not yet started
+
+### Adapter Phase 5: Hardware Deployment and Testing
+- Deploy to ioBroker dev server (iobroker-dev, SSH 10.10.5.65)
+- Deploy to Raspberry Pi (mcdu-pi, SSH 10.10.2.190)
+- End-to-end integration testing with real MCDU hardware
+- Not yet started
 
 ---
 
@@ -188,219 +141,42 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] \
 
 ### Hardware
 - **Device:** WINWING MCDU-32-CAPTAIN
-- **Vendor ID:** 0x4098
-- **Product ID:** 0xbb36
-- **Display:** 14 lines × 24 characters, 8 colors
+- **Vendor ID:** 0x4098 / **Product ID:** 0xbb36
+- **Display:** 14 lines x 24 characters, 8 colors
 - **Buttons:** 73 (12 LSK, 12 function, 26 letters, 10 numbers, 13 control)
 - **LEDs:** 11 (9 indicators + 2 backlights)
-- **Connection:** USB HID
 
-### Raspberry Pi
-- **Model:** Raspberry Pi 1 Model B Rev 2
-- **CPU:** ARMv6 @ 700MHz (single-core)
-- **RAM:** 512MB
-- **OS:** Raspberry Pi OS Lite (Legacy, 32-bit)
-- **Node.js:** v10.24.1 (last ARMv6-compatible version)
-- **IP:** 10.10.2.190
+### Display Constraints
+- 14 lines x 24 characters
+- 8 colors: white, amber, cyan, green, magenta, red, yellow, grey
+- LSK buttons map to odd display rows (LSK1=row1, LSK2=row3, etc.)
+- Row 13 reserved for status bar
+- Row 14 reserved for scratchpad
 
-### MQTT Broker
-- **Software:** Mosquitto
-- **IP:** 10.10.5.149
-- **Port:** 1883
-- **Authentication:** Username/password (iobroker)
-- **Topics:** 9 (6 subscribe, 3 publish)
+### MQTT Topics (per device)
+- `mcdu/{deviceId}/buttons/event` -- button presses (client to adapter)
+- `mcdu/{deviceId}/display/set` -- full screen update (adapter to client)
+- `mcdu/{deviceId}/display/line` -- single line update (adapter to client)
+- `mcdu/{deviceId}/leds/set` -- all LEDs (adapter to client)
+- `mcdu/{deviceId}/leds/single` -- single LED (adapter to client)
+- `mcdu/{deviceId}/status/online` -- device presence (LWT)
+- `mcdu/{deviceId}/status/ping` / `pong` -- health check
 
 ### Performance
-- **CPU Usage:** 20-30% idle, <80% under load
-- **Memory:** ~60MB
-- **Button Latency:** <100ms (press → MQTT publish)
-- **Display Latency:** <50ms (MQTT receive → hardware)
-- **Button Poll Rate:** 50Hz (optimized for Pi 1)
-- **Display Throttle:** 100ms (max 10 updates/sec)
-- **LED Throttle:** 50ms (max 20 updates/sec)
+- Button latency: <100ms (press to MQTT publish)
+- Display latency: <50ms (MQTT receive to hardware)
+- Display throttle: 100ms (max 10 updates/sec)
+- Re-render interval: 30s (configurable)
 
 ---
 
-## Available Colors
+## Commands
 
-- `white` - Default
-- `amber` - Navigation/headings
-- `cyan` - Information
-- `green` - Success/active
-- `magenta` - Special
-- `red` - Warnings/errors
-- `yellow` - Cautions
-- `grey` / `gray` - Inactive
-
----
-
-## Available LEDs
-
-**Indicators:**
-- `FAIL` - System failure indicator
-- `FM` - Flight mode 
-- `MCDU` - MCDU status
-- `MENU` - Menu active
-- `FM1` - Flight mode 1
-- `IND` - Index
-- `RDY` - Ready status
-- `STATUS` - Status indicator
-- `FM2` - Flight mode 2
-
-**Backlights:**
-- `BACKLIGHT` - Button backlight (0-255)
-- `SCREEN_BACKLIGHT` - Display backlight (0-255)
-
----
-
-## File Structure
-
+```bash
+npm test                  # Run all 109 tests
+npm run test:unit         # Unit tests only
+npm run test:integration  # Integration tests only
+npm run test:watch        # Watch mode for unit tests
+npm run lint              # ESLint
+npm run check             # Lint + test combined
 ```
-mcdu-smarthome/
-├── PROGRESS.md                      # Project timeline
-├── STATUS-SUMMARY.md                # This file
-├── PHASE3A-SPEC.md                  # MQTT contract spec
-├── PHASE3A-COMPLETE.md              # Implementation summary
-├── PHASE3A-LESSONS-LEARNED.md       # Bugs & learnings
-├── MQTT-TEST-COMMANDS.md            # Testing guide
-├── ARCHITECTURE-DECISION.md         # Phase 3 design
-│
-├── mcdu-client/                     # RasPi MQTT Client (Phase 3a)
-│   ├── mcdu-client.js               # Main client (~550 lines)
-│   ├── package.json                 # Dependencies
-│   ├── config.env.template          # Configuration template
-│   ├── mcdu-client.service          # systemd service
-│   ├── install-nodejs-armv6.sh      # Node.js installer for ARMv6
-│   ├── install.sh                   # Automated setup
-│   ├── README.md                    # Documentation
-│   ├── PI-SETUP.md                  # Deployment guide
-│   └── lib/
-│       ├── mcdu.js                  # Hardware driver (Phase 2)
-│       ├── button-map.json          # Button mapping (Phase 2.5)
-│       └── ...
-│
-├── nodejs-test/                     # Phase 2 development
-│   ├── mcdu.js                      # Original driver
-│   ├── demo.js                      # Interactive demo
-│   ├── button-map.json              # Button mapping
-│   └── ...
-│
-└── prototype/                       # Phase 1 (Python tests)
-    └── tests/
-        ├── button_test_final.py
-        ├── led_test.py
-        └── ...
-```
-
----
-
-## What's Next?
-
-### Option 1: Proceed to Phase 3b (ioBroker Adapter)
-**Scope:** Build ioBroker adapter that uses the MQTT client  
-**Time:** 2-3 days  
-**Features:**
-- Template system for pre-built pages
-- State mapping (ioBroker objects → MCDU)
-- Button handlers (MCDU → ioBroker actions)
-- JSON Config UI
-- Multi-MCDU support
-
-**Prerequisites:** All met ✅
-
-### Option 2: Production Optimization
-**Quick wins:**
-- Remove debug logging (keep log.debug only)
-- Add log rotation
-- Create deployment package
-- Write troubleshooting guide
-
-**Time:** 1-2 hours
-
-### Option 3: Integration with Existing Systems
-**Current client works with:**
-- Node-RED (via MQTT)
-- Home Assistant (via MQTT)
-- Any MQTT-capable system
-
-**Example:** Node-RED flow to display sensor data on MCDU
-
----
-
-## Success Metrics ✅
-
-### Phase 3a Goals (All Met)
-- ✅ RasPi client runs on Pi 1 Model B Rev 2
-- ✅ MQTT broker connection stable
-- ✅ All MQTT topics working
-- ✅ Display control functional (text + colors)
-- ✅ Button events publishing
-- ✅ LED control working (boolean + brightness)
-- ✅ Auto-start on boot
-- ✅ Error recovery (auto-reconnect)
-- ✅ Performance acceptable (<80% CPU)
-- ✅ Complete documentation
-- ✅ All bugs fixed
-
-### Overall Project Goals
-- ✅ Hardware protocol understood
-- ✅ Working Node.js driver
-- ✅ Physical button/LED mapping complete
-- ✅ MQTT integration working
-- ⏭️ ioBroker adapter (Phase 3b)
-- ⏭️ Template system (Phase 3b)
-- ⏭️ Multi-MCDU support (Phase 3b)
-
----
-
-## Total Time Investment
-
-| Phase | Time | Status |
-|-------|------|--------|
-| Phase 1: Hardware Testing | 2h | ✅ Complete |
-| Phase 2: Node.js Driver | 4h | ✅ Complete |
-| Phase 2.5: Physical Mapping | 20min | ✅ Complete |
-| Phase 3: Architecture | 30min | ✅ Complete |
-| Phase 3a: RasPi Client | 3h | ✅ Complete |
-| **Total** | **~11h** | **3a DONE** |
-| Phase 3b: ioBroker Adapter | 2-3 days | ⏭️ Not Started |
-
----
-
-## Repository
-
-**GitHub:** https://github.com/Flixhummel/kira  
-**Path:** `workspace/coding-projects/mcdu-smarthome/`  
-**Branch:** `main`  
-**Latest Commit:** `9c6f29b` - Fix per-line color support
-
----
-
-## Contact & Support
-
-**Hardware:** WINWING MCDU-32-CAPTAIN  
-**Software:** Node.js v10.24.1, MQTT (Mosquitto)  
-**Platform:** Raspberry Pi OS Lite (Legacy, Debian Buster)  
-**MQTT Broker:** 10.10.5.149:1883 (iobroker)
-
----
-
-## Quick Start (For New Users)
-
-1. **Flash Pi:** Raspberry Pi OS Lite (Legacy, 32-bit)
-2. **Install Node.js:** Run `install-nodejs-armv6.sh` on Pi
-3. **Deploy Client:** Copy mcdu-client/ to `/home/pi/`
-4. **Configure:** Edit `config.env` (set MQTT broker)
-5. **Install Service:** Run `install.sh`
-6. **Test:** `mosquitto_pub` to send display updates
-
-Full guide: `mcdu-client/PI-SETUP.md`
-
----
-
-**Status:** ✅ **PHASE 3A COMPLETE - PRODUCTION-READY**  
-**Next:** Phase 3b (ioBroker Adapter) or Integration Testing
-
----
-
-**EOF**

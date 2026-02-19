@@ -14,7 +14,7 @@
  */
 
 const { expect } = require('chai');
-const ScratchpadManager = require('../lib/input/ScratchpadManager');
+const ScratchpadManager = require('../../lib/input/ScratchpadManager');
 
 describe('ScratchpadManager', () => {
     let adapter, displayPublisher, scratchpad;
