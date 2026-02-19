@@ -86,187 +86,46 @@
     "pages": [
       {
         "id": "home-main",
-        "name": "Hauptmenü",
+        "name": "Hauptmenue",
         "parent": null,
         "lines": [
           {
             "row": 1,
-            "leftButton": {
-              "type": "empty"
+            "left": {
+              "label": "",
+              "display": { "type": "label", "text": "BELEUCHTUNG", "color": "white" },
+              "button": { "type": "empty" }
             },
-            "display": {
-              "type": "label",
-              "label": "BELEUCHTUNG",
-              "color": "white",
-              "align": "left"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 2,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "empty"
-            },
-            "rightButton": {
-              "type": "empty"
+            "right": {
+              "label": "",
+              "display": { "type": "empty" },
+              "button": { "type": "empty" }
             }
           },
           {
             "row": 3,
-            "leftButton": {
-              "type": "empty"
+            "left": {
+              "label": "",
+              "display": { "type": "label", "text": "KLIMA", "color": "white" },
+              "button": { "type": "empty" }
             },
-            "display": {
-              "type": "label",
-              "label": "KLIMA",
-              "color": "white",
-              "align": "left"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 4,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "empty"
-            },
-            "rightButton": {
-              "type": "empty"
+            "right": {
+              "label": "",
+              "display": { "type": "empty" },
+              "button": { "type": "empty" }
             }
           },
           {
             "row": 5,
-            "leftButton": {
-              "type": "empty"
+            "left": {
+              "label": "",
+              "display": { "type": "label", "text": "SYSTEM STATUS", "color": "white" },
+              "button": { "type": "empty" }
             },
-            "display": {
-              "type": "label",
-              "label": "SYSTEM STATUS",
-              "color": "white",
-              "align": "left"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 6,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "empty"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 7,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "empty"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 8,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "empty"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 9,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "empty"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 10,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "empty"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 11,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "empty"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 12,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "empty"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 13,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "empty"
-            },
-            "rightButton": {
-              "type": "empty"
-            }
-          },
-          {
-            "row": 14,
-            "leftButton": {
-              "type": "empty"
-            },
-            "display": {
-              "type": "label",
-              "label": "____________________",
-              "color": "white",
-              "align": "left"
-            },
-            "rightButton": {
-              "type": "empty"
+            "right": {
+              "label": "",
+              "display": { "type": "empty" },
+              "button": { "type": "empty" }
             }
           }
         ]
