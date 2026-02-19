@@ -287,9 +287,11 @@
                   ]
                 },
                 {
-                  "type": "text",
+                  "type": "autocompleteSendTo",
                   "attr": "leftTarget",
                   "title": "L-Target",
+                  "command": "getPageList",
+                  "freeSolo": true,
                   "width": "120px",
                   "default": ""
                 },
@@ -331,9 +333,11 @@
                   ]
                 },
                 {
-                  "type": "text",
+                  "type": "autocompleteSendTo",
                   "attr": "rightTarget",
                   "title": "R-Target",
+                  "command": "getPageList",
+                  "freeSolo": true,
                   "width": "120px",
                   "default": ""
                 }
