@@ -28,6 +28,9 @@ const ConfirmationDialog = require('./lib/input/ConfirmationDialog');
 // Phase 4: Template System
 const TemplateLoader = require('./lib/templates/TemplateLoader');
 
+// Line format conversion (flat ↔ nested for Admin UI)
+const { flattenPages, unflattenPages } = require('./lib/utils/lineNormalizer');
+
 class McduAdapter extends utils.Adapter {
     /**
      * @param {Partial<utils.AdapterOptions>} [options={}]
@@ -884,36 +887,43 @@ class McduAdapter extends utils.Adapter {
      * Handle loadTemplate command from admin UI
      * @param {object} obj - Message object with templateId
      */
-    handleLoadTemplate(obj) {
+    async handleLoadTemplate(obj) {
         const templateId = obj.message?.templateId;
-        
+
         if (!templateId) {
             this.sendTo(obj.from, obj.command, { error: 'No templateId provided' }, obj.callback);
             return;
         }
-        
+
         if (!this.templateLoader) {
             this.sendTo(obj.from, obj.command, { error: 'Template loader not initialized' }, obj.callback);
             return;
         }
-        
+
         const template = this.templateLoader.getTemplate(templateId);
-        
+
         if (!template) {
             this.sendTo(obj.from, obj.command, { error: 'Template not found' }, obj.callback);
             return;
         }
-        
-        // Return template pages to admin UI
+
+        // Flatten template pages for Admin UI
+        const flatPages = flattenPages(template.pages || []);
+
+        // Push template pages into native config so Admin UI refreshes
+        await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
+            native: { pages: flatPages }
+        });
+
         this.sendTo(obj.from, obj.command, {
             success: true,
             template: {
                 name: template.name,
                 description: template.description,
-                pages: template.pages
+                pages: flatPages
             }
         }, obj.callback);
-        
+
         this.log.info(`Template '${template.name}' loaded successfully`);
     }
     
@@ -1002,8 +1012,28 @@ class McduAdapter extends utils.Adapter {
                 }
             }
 
+            // Flatten lines for Admin UI table (nested dot-paths don't work in jsonConfig tables)
+            const flatPages = flattenPages(pages);
+
+            // Also load function keys for this device
+            const fkStateId = `devices.${deviceId}.config.functionKeys`;
+            const fkState = await this.getStateAsync(fkStateId);
+            let functionKeys = [];
+            if (fkState && fkState.val) {
+                try {
+                    functionKeys = JSON.parse(fkState.val);
+                } catch (e) {
+                    this.log.warn(`Invalid JSON in ${fkStateId}: ${e.message}`);
+                }
+            }
+
+            // Push loaded data into native config so Admin UI refreshes
+            await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
+                native: { pages: flatPages, functionKeys }
+            });
+
             this.log.info(`loadDevicePages: Loaded ${pages.length} pages for device ${deviceId}`);
-            this.sendTo(obj.from, obj.command, { pages }, obj.callback);
+            this.sendTo(obj.from, obj.command, { success: true, pages: flatPages }, obj.callback);
         } catch (error) {
             this.log.error(`Error in loadDevicePages: ${error.message}`);
             this.sendTo(obj.from, obj.command, { error: error.message }, obj.callback);
@@ -1018,7 +1048,7 @@ class McduAdapter extends utils.Adapter {
     async handleSaveDevicePages(obj) {
         try {
             // Support both direct {deviceId, pages} and useNative (entire native config)
-            let deviceId, pages;
+            let deviceId, pages, functionKeys;
             if (obj.message?.deviceId) {
                 deviceId = obj.message.deviceId;
                 pages = obj.message.pages;
@@ -1026,7 +1056,11 @@ class McduAdapter extends utils.Adapter {
                 // useNative sends the full native config
                 deviceId = obj.message?.selectedDevice;
                 pages = obj.message?.pages;
+                functionKeys = obj.message?.functionKeys;
             }
+
+            this.log.debug(`saveDevicePages: keys=${Object.keys(obj.message || {}).join(',')}, deviceId=${deviceId}`);
+
             if (!deviceId) {
                 this.sendTo(obj.from, obj.command, { error: 'No device selected' }, obj.callback);
                 return;
@@ -1036,16 +1070,29 @@ class McduAdapter extends utils.Adapter {
                 return;
             }
 
+            // Convert flat lines (from Admin UI) back to nested format for storage
+            const nestedPages = unflattenPages(pages);
+
             const stateId = `devices.${deviceId}.config.pages`;
-            await this.setStateAsync(stateId, JSON.stringify(pages), true);
+            await this.setStateAsync(stateId, JSON.stringify(nestedPages), true);
 
             // Update active config if this is the active device
             if (this.displayPublisher && this.displayPublisher.deviceId === deviceId) {
-                this.config.pages = pages;
+                this.config.pages = nestedPages;
                 await this.renderCurrentPage();
             }
 
-            this.log.info(`saveDevicePages: Saved ${pages.length} pages for device ${deviceId}`);
+            // Also save function keys if present
+            if (Array.isArray(functionKeys)) {
+                const fkStateId = `devices.${deviceId}.config.functionKeys`;
+                await this.setStateAsync(fkStateId, JSON.stringify(functionKeys), true);
+                if (this.displayPublisher && this.displayPublisher.deviceId === deviceId) {
+                    this.config.functionKeys = functionKeys;
+                }
+                this.log.info(`saveDevicePages: Also saved ${functionKeys.length} function keys for device ${deviceId}`);
+            }
+
+            this.log.info(`saveDevicePages: Saved ${nestedPages.length} pages for device ${deviceId}`);
             this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
         } catch (error) {
             this.log.error(`Error in saveDevicePages: ${error.message}`);
@@ -1350,10 +1397,12 @@ class McduAdapter extends utils.Adapter {
             const hasDevicePages = state && state.val && state.val !== '[]';
 
             if (!hasDevicePages && this.config.pages && this.config.pages.length > 0) {
-                this.log.info(`Migrating ${this.config.pages.length} pages from native.pages to device ${deviceId}`);
+                // native.pages may be flat format (from Admin UI) — convert to nested for storage
+                const nestedPages = unflattenPages(this.config.pages);
+                this.log.info(`Migrating ${nestedPages.length} pages from native.pages to device ${deviceId}`);
                 await this.setStateAsync(
                     `devices.${deviceId}.config.pages`,
-                    JSON.stringify(this.config.pages),
+                    JSON.stringify(nestedPages),
                     true
                 );
             }

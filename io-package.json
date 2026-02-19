@@ -108,42 +108,24 @@
         "lines": [
           {
             "row": 1,
-            "left": {
-              "label": "",
-              "display": { "type": "label", "text": "BELEUCHTUNG", "color": "white" },
-              "button": { "type": "empty" }
-            },
-            "right": {
-              "label": "",
-              "display": { "type": "empty" },
-              "button": { "type": "empty" }
-            }
+            "leftLabel": "", "leftDisplayType": "label", "leftText": "BELEUCHTUNG", "leftColor": "white",
+            "leftButtonType": "empty", "leftTarget": "",
+            "rightLabel": "", "rightDisplayType": "empty", "rightText": "", "rightColor": "",
+            "rightButtonType": "empty", "rightTarget": ""
           },
           {
             "row": 3,
-            "left": {
-              "label": "",
-              "display": { "type": "label", "text": "KLIMA", "color": "white" },
-              "button": { "type": "empty" }
-            },
-            "right": {
-              "label": "",
-              "display": { "type": "empty" },
-              "button": { "type": "empty" }
-            }
+            "leftLabel": "", "leftDisplayType": "label", "leftText": "KLIMA", "leftColor": "white",
+            "leftButtonType": "empty", "leftTarget": "",
+            "rightLabel": "", "rightDisplayType": "empty", "rightText": "", "rightColor": "",
+            "rightButtonType": "empty", "rightTarget": ""
           },
           {
             "row": 5,
-            "left": {
-              "label": "",
-              "display": { "type": "label", "text": "SYSTEM STATUS", "color": "white" },
-              "button": { "type": "empty" }
-            },
-            "right": {
-              "label": "",
-              "display": { "type": "empty" },
-              "button": { "type": "empty" }
-            }
+            "leftLabel": "", "leftDisplayType": "label", "leftText": "SYSTEM STATUS", "leftColor": "white",
+            "leftButtonType": "empty", "leftTarget": "",
+            "rightLabel": "", "rightDisplayType": "empty", "rightText": "", "rightColor": "",
+            "rightButtonType": "empty", "rightTarget": ""
           }
         ]
       }

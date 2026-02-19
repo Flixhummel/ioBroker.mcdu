@@ -145,6 +145,13 @@
               "sm": 12,
               "md": 6
             },
+            "_loadWarning": {
+              "type": "staticText",
+              "text": "Loading will replace the current page configuration in the editor.",
+              "style": {"color": "#ff9800", "fontWeight": "bold"},
+              "sm": 12,
+              "hidden": "!data.selectedDevice"
+            },
             "loadDevicePagesBtn": {
               "type": "sendTo",
               "command": "loadDevicePages",
@@ -152,7 +159,8 @@
               "variant": "contained",
               "label": "Load Config",
               "sm": 6,
-              "md": 3
+              "md": 3,
+              "disabled": "!data.selectedDevice"
             },
             "saveDevicePagesBtn": {
               "type": "sendTo",
@@ -161,50 +169,22 @@
               "label": "Save Config",
               "useNative": true,
               "sm": 6,
-              "md": 3
-            }
-          }
-        },
-        "_dividerTemplate": {
-          "type": "divider",
-          "text": "Templates"
-        },
-        "templateSection": {
-          "type": "panel",
-          "items": {
-            "selectedTemplate": {
-              "type": "select",
-              "label": "Template",
-              "options": [
-                {"label": "-- Select Template --", "value": ""},
-                {"label": "Home Automation", "value": "home"},
-                {"label": "Climate Control", "value": "climate"},
-                {"label": "Lighting Control", "value": "lights"}
-              ],
-              "sm": 12,
-              "md": 6
-            },
-            "loadTemplateButton": {
-              "type": "sendTo",
-              "command": "loadTemplate",
-              "jsonData": "{\"templateId\": \"${data.selectedTemplate}\"}",
-              "variant": "contained",
-              "label": "Apply Template",
-              "useNative": true,
-              "sm": 12,
-              "md": 6
+              "md": 3,
+              "disabled": "!data.selectedDevice"
             }
           }
         },
         "_dividerPages": {
           "type": "divider",
-          "text": "Pages"
+          "text": "Pages",
+          "hidden": "!data.selectedDevice"
         },
         "pages": {
           "type": "accordion",
           "label": "MCDU Pages",
           "titleAttr": "name",
           "clone": true,
+          "hidden": "!data.selectedDevice",
           "items": [
             {
               "type": "text",
@@ -266,67 +246,146 @@
                   "default": 1
                 },
                 {
-                  "type": "text",
-                  "attr": "left.label",
-                  "title": "L-Label",
+                  "type": "select",
+                  "attr": "leftDisplayType",
+                  "title": "L-Type",
                   "width": "90px",
-                  "default": ""
+                  "default": "empty",
+                  "options": [
+                    {"label": "-", "value": "empty"},
+                    {"label": "Label", "value": "label"},
+                    {"label": "Datapoint", "value": "datapoint"}
+                  ]
                 },
                 {
                   "type": "text",
-                  "attr": "left.display.text",
+                  "attr": "leftText",
                   "title": "L-Text",
-                  "width": "110px",
+                  "width": "100px",
                   "default": ""
                 },
                 {
-                  "type": "text",
-                  "attr": "left.button.target",
-                  "title": "L-Target",
-                  "width": "110px",
-                  "default": ""
+                  "type": "select",
+                  "attr": "leftColor",
+                  "title": "L-Color",
+                  "width": "80px",
+                  "default": "",
+                  "options": [
+                    {"label": "-", "value": ""},
+                    {"label": "White", "value": "white"},
+                    {"label": "Green", "value": "green"},
+                    {"label": "Blue", "value": "blue"},
+                    {"label": "Amber", "value": "amber"},
+                    {"label": "Red", "value": "red"},
+                    {"label": "Magenta", "value": "magenta"},
+                    {"label": "Cyan", "value": "cyan"},
+                    {"label": "Yellow", "value": "yellow"}
+                  ]
                 },
                 {
                   "type": "text",
-                  "attr": "right.label",
-                  "title": "R-Label",
+                  "attr": "leftLabel",
+                  "title": "L-Label",
+                  "width": "80px",
+                  "default": ""
+                },
+                {
+                  "type": "select",
+                  "attr": "leftButtonType",
+                  "title": "L-Btn",
                   "width": "90px",
-                  "default": ""
+                  "default": "empty",
+                  "options": [
+                    {"label": "-", "value": "empty"},
+                    {"label": "Navigate", "value": "navigation"},
+                    {"label": "Datapoint", "value": "datapoint"}
+                  ]
                 },
                 {
                   "type": "text",
-                  "attr": "right.display.text",
+                  "attr": "leftTarget",
+                  "title": "L-Target",
+                  "width": "100px",
+                  "default": ""
+                },
+                {
+                  "type": "select",
+                  "attr": "rightDisplayType",
+                  "title": "R-Type",
+                  "width": "90px",
+                  "default": "empty",
+                  "options": [
+                    {"label": "-", "value": "empty"},
+                    {"label": "Label", "value": "label"},
+                    {"label": "Datapoint", "value": "datapoint"}
+                  ]
+                },
+                {
+                  "type": "text",
+                  "attr": "rightText",
                   "title": "R-Text",
-                  "width": "110px",
+                  "width": "100px",
                   "default": ""
                 },
                 {
+                  "type": "select",
+                  "attr": "rightColor",
+                  "title": "R-Color",
+                  "width": "80px",
+                  "default": "",
+                  "options": [
+                    {"label": "-", "value": ""},
+                    {"label": "White", "value": "white"},
+                    {"label": "Green", "value": "green"},
+                    {"label": "Blue", "value": "blue"},
+                    {"label": "Amber", "value": "amber"},
+                    {"label": "Red", "value": "red"},
+                    {"label": "Magenta", "value": "magenta"},
+                    {"label": "Cyan", "value": "cyan"},
+                    {"label": "Yellow", "value": "yellow"}
+                  ]
+                },
+                {
                   "type": "text",
-                  "attr": "right.button.target",
+                  "attr": "rightLabel",
+                  "title": "R-Label",
+                  "width": "80px",
+                  "default": ""
+                },
+                {
+                  "type": "select",
+                  "attr": "rightButtonType",
+                  "title": "R-Btn",
+                  "width": "90px",
+                  "default": "empty",
+                  "options": [
+                    {"label": "-", "value": "empty"},
+                    {"label": "Navigate", "value": "navigation"},
+                    {"label": "Datapoint", "value": "datapoint"}
+                  ]
+                },
+                {
+                  "type": "text",
+                  "attr": "rightTarget",
                   "title": "R-Target",
-                  "width": "110px",
+                  "width": "100px",
                   "default": ""
                 }
               ]
             }
           ]
-        }
-      }
-    },
-    "functionKeysTab": {
-      "type": "panel",
-      "label": "Function Keys",
-      "items": {
-        "_fkInfo": {
-          "type": "staticText",
-          "text": "Configure which page each function key navigates to. MENU is always fixed to home page. PREV/NEXT PAGE are hardcoded for pagination.",
-          "sm": 12
+        },
+        "_dividerFunctionKeys": {
+          "type": "divider",
+          "text": "Function Keys",
+          "hidden": "!data.selectedDevice"
         },
         "functionKeys": {
           "type": "table",
           "label": "Function Key Assignments",
           "sm": 12,
           "noDelete": true,
+          "hidden": "!data.selectedDevice",
           "items": [
             {
               "type": "text",
@@ -360,6 +419,38 @@
               "freeSolo": true
             }
           ]
+        },
+        "_dividerTemplate": {
+          "type": "divider",
+          "text": "Templates",
+          "hidden": "!data.selectedDevice"
+        },
+        "templateSection": {
+          "type": "panel",
+          "hidden": "!data.selectedDevice",
+          "items": {
+            "selectedTemplate": {
+              "type": "select",
+              "label": "Template",
+              "options": [
+                {"label": "-- Select Template --", "value": ""},
+                {"label": "Home Automation", "value": "home"},
+                {"label": "Climate Control", "value": "climate"},
+                {"label": "Lighting Control", "value": "lights"}
+              ],
+              "sm": 12,
+              "md": 6
+            },
+            "loadTemplateButton": {
+              "type": "sendTo",
+              "command": "loadTemplate",
+              "jsonData": "{\"templateId\": \"${data.selectedTemplate}\"}",
+              "variant": "contained",
+              "label": "Apply Template",
+              "sm": 12,
+              "md": 6
+            }
+          }
         }
       }
     },
