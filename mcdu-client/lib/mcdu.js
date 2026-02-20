@@ -148,8 +148,10 @@ class MCDU {
      */
     _write(packet) {
         if (this._platform === 'linux') {
+            if (!this._usbDevice) return Promise.resolve();
             return this._ctrlTransfer(packet);
         } else {
+            if (!this._hidDevice) return;
             this._hidDevice.write(Buffer.from(packet));
         }
     }
@@ -201,6 +203,7 @@ class MCDU {
 
         for (let i = 0; i < tmpArray.length; i += 63) {
             await this._write([0xf2, ...tmpArray.slice(i, i + 63)]);
+            await new Promise(r => setTimeout(r, 40));
         }
     }
 
