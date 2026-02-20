@@ -43,6 +43,7 @@ class MCDU {
     constructor() {
         this.device = null;
         this.buttonCallback = null;
+        this._buttonPollInterval = null;
         // Page buffer: 14 lines of text
         this.page = this._createEmptyPage();
         // Color buffer: 14 lines × 24 chars of colors (per-character)
@@ -265,44 +266,42 @@ class MCDU {
         }
     }
 
-    startButtonReading(callback) {
+    startButtonReading(callback, pollIntervalMs) {
         this.buttonCallback = callback;
-        
-        this.device.on('data', (data) => {
-            if (data[0] === 0x01 && data.length >= 13) {
-                const buttonBytes = data.slice(1, 13);
-                
-                const pressed = [];
-                for (let byteIdx = 0; byteIdx < 12; byteIdx++) {
-                    for (let bitIdx = 0; bitIdx < 8; bitIdx++) {
-                        if (buttonBytes[byteIdx] & (1 << bitIdx)) {
-                            pressed.push(byteIdx * 8 + bitIdx);
+        pollIntervalMs = pollIntervalMs || 50;
+
+        this.device.setNonBlocking(1); // non-blocking: readSync() returns [] immediately if no data
+
+        this._buttonPollInterval = setInterval(() => {
+            try {
+                const data = this.device.readSync();
+                if (data && data.length >= 13 && data[0] === 0x01) {
+                    const buttonBytes = data.slice(1, 13);
+                    const pressed = [];
+                    for (let byteIdx = 0; byteIdx < 12; byteIdx++) {
+                        for (let bitIdx = 0; bitIdx < 8; bitIdx++) {
+                            if (buttonBytes[byteIdx] & (1 << bitIdx)) {
+                                pressed.push(byteIdx * 8 + bitIdx);
+                            }
                         }
                     }
+                    if (pressed.length > 0 && this.buttonCallback) {
+                        this.buttonCallback(pressed);
+                    }
                 }
-                
-                if (pressed.length > 0 && this.buttonCallback) {
-                    this.buttonCallback(pressed);
-                }
+            } catch (e) {
+                // device disconnected or read error — swallow silently
             }
-        });
+        }, pollIntervalMs);
     }
 
-    /**
-     * Stop button reading and clean up the HID read thread.
-     * MUST be called before close() or process exit to prevent
-     * node-hid read thread from corrupting the USB endpoint state.
-     */
     stopButtonReading() {
-        if (this.device) {
-            this.device.removeAllListeners('data');
-            try {
-                this.device.setNonBlocking(1);
-            } catch (e) {
-                // may fail if device already closed
-            }
+        if (this._buttonPollInterval) {
+            clearInterval(this._buttonPollInterval);
+            this._buttonPollInterval = null;
         }
         this.buttonCallback = null;
+        // No need to setNonBlocking — device will be closed
     }
 
     close() {
