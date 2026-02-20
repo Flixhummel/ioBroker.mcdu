@@ -74,6 +74,9 @@ const log = {
 // STATE MANAGEMENT
 // ============================================================================
 
+let hardwareReady = false;
+let displayReadyResolve = null;
+
 // Display cache (14 lines × 24 chars)
 const displayCache = {
   lines: Array(14).fill(null).map(() => ({
@@ -200,12 +203,6 @@ function connectMQTT() {
       topic('status/ping')
     ];
     
-    // Connect MCDU hardware NOW — after MQTT TCP is established so the
-    // LAN9512 USB/Ethernet chip is not busy with TCP handshake during initDisplay().
-    // Node.js is single-threaded: retained 'display/set' won't fire until after
-    // connectMCDU() returns, so the display is ready before the first write.
-    connectMCDU();
-
     mqttClient.subscribe(topics, {qos: 1}, (err) => {
       if (err) {
         log.error('Subscribe failed:', err);
@@ -280,32 +277,26 @@ function handleMQTTMessage(topicStr, message) {
  * Handle mcdu/display/set - full display update (14 lines)
  */
 function handleDisplaySet(data) {
-  // Validate
   if (!Array.isArray(data.lines) || data.lines.length !== 14) {
-    log.error('Invalid display/set: lines must be array of 14');
+    log.error('Invalid display/set: expected 14 lines');
     return;
   }
-  
+
+  // Pre-init: store for hardware startup
+  if (!hardwareReady) {
+    if (displayReadyResolve) displayReadyResolve(data);
+    return;
+  }
+
+  // Post-init: update cache + render (no re-initDisplay)
   log.info('Display set received:', data.lines.length, 'lines, line0:', (data.lines[0] && data.lines[0].text || '').trim());
 
-  // Update cache and set lines
   data.lines.forEach((line, i) => {
     const text = padOrTruncate(line.text, 24);
     const color = validateColor(line.color);
-
     displayCache.lines[i] = {text, color};
-
-    if (!CONFIG.mockMode) {
-      mcdu.setLine(i, text, color);
-    }
+    if (!CONFIG.mockMode) mcdu.setLine(i, text, color);
   });
-
-  // On the very first render: call initDisplay() immediately before updateDisplay()
-  // so 0xf2 display data follows 0xf0 init packets within milliseconds.
-  if (!CONFIG.mockMode && stats.displaysRendered === 0) {
-    log.info('First render: calling initDisplay() now');
-    mcdu.initDisplay();
-  }
 
   // Render (throttled)
   updateDisplay();
@@ -383,9 +374,6 @@ function handleDisplayClear(data) {
  * Handle mcdu/leds/set - set all LEDs
  */
 function handleLEDsSet(data) {
-  // Debug: log raw received data
-  console.log('[DEBUG] handleLEDsSet received:', JSON.stringify(data));
-  
   // Validate
   if (!data.leds || typeof data.leds !== 'object') {
     log.error('Invalid leds/set: leds must be an object, received:', JSON.stringify(data));
@@ -419,9 +407,6 @@ function handleLEDsSet(data) {
  * Handle mcdu/leds/single - set single LED
  */
 function handleLEDSingle(data) {
-  // Debug: log raw received data
-  console.log('[DEBUG] handleLEDSingle received:', JSON.stringify(data));
-  
   // Validate
   if (!data.name || !ledCache.hasOwnProperty(data.name)) {
     log.warn('Unknown LED:', data.name, 'received:', JSON.stringify(data));
@@ -478,18 +463,11 @@ function handleStatusPing(data) {
 function updateDisplay() {
   const now = Date.now();
   if (now - displayCache.lastUpdate < CONFIG.performance.displayThrottle) {
-    log.debug('Display throttled');
     return;
   }
-  
-  if (!CONFIG.mockMode) {
-    mcdu.updateDisplay();
-  }
-  
+  if (!CONFIG.mockMode && mcdu) mcdu.updateDisplay();
   displayCache.lastUpdate = now;
   stats.displaysRendered++;
-  
-  log.info('Display rendered (writes:', stats.displaysRendered, ')');
 }
 
 let lastLEDUpdate = 0;
@@ -498,24 +476,18 @@ let lastLEDUpdate = 0;
  * Update LEDs (throttled to 50ms)
  */
 function updateLEDs() {
-  console.log('[DEBUG] updateLEDs called, ledCache:', JSON.stringify(ledCache));
-  
   const now = Date.now();
   if (now - lastLEDUpdate < CONFIG.performance.ledThrottle) {
     log.debug('LED throttled');
     return;
   }
-  
-  console.log('[DEBUG] Calling mcdu.setAllLEDs with:', JSON.stringify(ledCache));
-  
+
   if (!CONFIG.mockMode) {
     mcdu.setAllLEDs(ledCache);
   }
-  
+
   lastLEDUpdate = now;
-  
   log.debug('LEDs updated');
-  console.log('[DEBUG] LEDs sent to hardware');
 }
 
 // ============================================================================
@@ -524,49 +496,60 @@ function updateLEDs() {
 
 let mcdu = null;
 
-function connectMCDU() {
+function waitForDisplay(timeoutMs) {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      log.info('No retained display within timeout, using blank display');
+      displayReadyResolve = null;
+      resolve(null);
+    }, timeoutMs);
+    displayReadyResolve = (data) => {
+      clearTimeout(timer);
+      displayReadyResolve = null;
+      resolve(data);
+    };
+  });
+}
+
+function handleButtonCodes(buttonCodes) {
+  for (const code of buttonCodes) {
+    const buttonName = getButtonName(code);
+    if (buttonName) {
+      handleButtonEvent(buttonName, 'press');
+    }
+  }
+}
+
+function initHardware(displayData) {
   if (CONFIG.mockMode) {
-    log.info('MOCK MODE: Skipping MCDU hardware connection');
     startMockButtonEvents();
     return;
   }
-  
-  log.info('Connecting to MCDU hardware...');
-  
   try {
     mcdu = new MCDU();
     mcdu.connect();
-    
-    log.info('MCDU device connected (VID:', CONFIG.hardware.vendorId.toString(16), 'PID:', CONFIG.hardware.productId.toString(16) + ')');
-    
-    // Open HID device only — do NOT call initDisplay() yet.
-    // The firmware has a tight timing window: 0xf2 display data must follow
-    // 0xf0 init packets within milliseconds or the display module closes.
-    // initDisplay() is deferred to handleDisplaySet() so it runs immediately
-    // before the first updateDisplay() call with real content.
-    log.info('MCDU device opened, deferring initDisplay to first render');
+    log.info('MCDU connected');
 
-    // Set initial LEDs (backlights on, others off) — LED packets (0x02) work immediately
     mcdu.setAllLEDs(ledCache);
-    log.info('LEDs initialized');
+    mcdu.initDisplay();
+    log.info('Display initialized');
 
-    // Start button reading immediately — buttons work regardless of display state
-    mcdu.startButtonReading((buttonCodes) => {
-      for (const code of buttonCodes) {
-        const buttonName = getButtonName(code);
-        if (buttonName) {
-          handleButtonEvent(buttonName, 'press');
-        }
-      }
-    }, CONFIG.performance.buttonPollRate);
-    log.info('Button reading started (' + CONFIG.performance.buttonPollRate + 'Hz)');
-    
+    const lines = (displayData && displayData.lines) ||
+      Array(14).fill({text: '                        ', color: 'white'});
+
+    lines.forEach((line, i) => {
+      const text = padOrTruncate(line.text, 24);
+      const color = validateColor(line.color);
+      displayCache.lines[i] = {text, color};
+      mcdu.setLine(i, text, color);
+    });
+
+    mcdu.updateDisplay();
+    stats.displaysRendered = 1;
+    displayCache.lastUpdate = Date.now();
+    log.info('Display rendered');
   } catch (err) {
-    log.error('Failed to connect to MCDU:', err.message);
-    publishError('Failed to connect to MCDU', 'DEVICE_NOT_FOUND', err);
-    
-    // Retry in 5 seconds
-    setTimeout(connectMCDU, 5000);
+    log.error('Hardware init failed:', err.message);
   }
 }
 
@@ -737,19 +720,32 @@ process.on('uncaughtException', (err) => {
 // MAIN
 // ============================================================================
 
-function main() {
+async function main() {
   log.info('=== MCDU MQTT Client v1.0.0 ===');
   log.info('Platform:', require('os').platform(), require('os').arch());
   log.info('Node.js:', process.version);
   log.info('Hostname:', require('os').hostname());
   log.info('Mock mode:', CONFIG.mockMode);
   log.info('===============================');
-  
-  // Connect to MQTT broker first — connectMCDU() is called inside the
-  // on('connect') callback so MCDU init happens after TCP is established.
+
+  // 1. Connect MQTT (registers handlers, subscribes)
   connectMQTT();
 
-  log.info('Startup complete');
+  // 2. Wait up to 3s for retained display/set from adapter
+  const initialDisplay = await waitForDisplay(3000);
+
+  // 3. Open hardware + full synchronous init+render burst
+  initHardware(initialDisplay);
+
+  // 4. Start button polling AFTER display is rendered
+  if (!CONFIG.mockMode && mcdu) {
+    const pollIntervalMs = Math.round(1000 / CONFIG.performance.buttonPollRate);
+    mcdu.startButtonReading(handleButtonCodes, pollIntervalMs);
+    log.info('Button polling started (' + CONFIG.performance.buttonPollRate + 'Hz)');
+  }
+
+  hardwareReady = true;
+  log.info('Ready');
 }
 
 // Start
