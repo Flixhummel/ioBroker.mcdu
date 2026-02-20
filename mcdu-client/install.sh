@@ -26,10 +26,19 @@ if [ ! -f "mcdu-client.js" ]; then
     exit 1
 fi
 
+# Install build dependencies for node-hid libusb backend
+# (hidraw backend silently fails for WinWing display writes on Pi)
+if [ "$(uname)" = "Linux" ]; then
+    echo ""
+    echo "Installing build dependencies for node-hid (libusb)..."
+    sudo apt-get install -y libusb-1.0-0-dev libudev-dev build-essential python3
+fi
+
 # Install npm dependencies
+# .npmrc sets driver=libusb so node-hid is built with libusb backend on Linux
 echo ""
 echo "Installing npm dependencies..."
-npm install
+npm install --build-from-source
 
 # Create symlinks to hardware driver (from Phase 2)
 echo ""
@@ -58,6 +67,16 @@ if [ ! -f "config.env" ]; then
 else
     echo ""
     echo "✓ config.env already exists (not overwriting)"
+fi
+
+# Install udev rule for WinWing MCDU USB access (needed for libusb without root)
+if [ "$(uname)" = "Linux" ]; then
+    echo ""
+    echo "Installing udev rule for WinWing MCDU..."
+    echo 'SUBSYSTEM=="usb", ATTRS{idVendor}=="4098", ATTRS{idProduct}=="bb36", MODE="0666", GROUP="plugdev"' | sudo tee /etc/udev/rules.d/99-winwing-mcdu.rules > /dev/null
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
+    echo "✓ udev rule installed"
 fi
 
 # Check if systemd service should be installed
