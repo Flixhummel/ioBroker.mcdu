@@ -270,11 +270,13 @@ class MCDU {
         this.buttonCallback = callback;
         pollIntervalMs = pollIntervalMs || 50;
 
-        this.device.setNonBlocking(1); // non-blocking: readSync() returns [] immediately if no data
-
+        // readTimeout(0): returns immediately if no data, does NOT set O_NONBLOCK on the fd.
+        // Using setNonBlocking(1) + readSync() would set O_NONBLOCK on the fd which also
+        // affects writes — causing device.write() to fail with EAGAIN when the USB buffer
+        // is busy (e.g. during updateDisplay bursts). readTimeout(0) avoids this.
         this._buttonPollInterval = setInterval(() => {
             try {
-                const data = this.device.readSync();
+                const data = this.device.readTimeout(0);
                 if (data && data.length >= 13 && data[0] === 0x01) {
                     const buttonBytes = data.slice(1, 13);
                     const pressed = [];
