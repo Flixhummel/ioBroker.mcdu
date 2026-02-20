@@ -7,6 +7,11 @@
 
 const HID = require('node-hid');
 
+// Force libusb backend on Linux — hidraw silently fails for WinWing display writes
+if (process.platform === 'linux') {
+    HID.setDriverType('libusb');
+}
+
 const VENDOR_ID = 0x4098;
 const PRODUCT_ID = 0xbb36;
 
