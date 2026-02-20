@@ -520,7 +520,7 @@ function handleButtonCodes(buttonCodes) {
   }
 }
 
-function initHardware(displayData) {
+async function initHardware(displayData) {
   if (CONFIG.mockMode) {
     startMockButtonEvents();
     return;
@@ -530,8 +530,8 @@ function initHardware(displayData) {
     mcdu.connect();
     log.info('MCDU connected');
 
-    mcdu.setAllLEDs(ledCache);
-    mcdu.initDisplay();
+    await mcdu.setAllLEDs(ledCache);
+    await mcdu.initDisplay();
     log.info('Display initialized');
 
     const lines = (displayData && displayData.lines) ||
@@ -544,7 +544,7 @@ function initHardware(displayData) {
       mcdu.setLine(i, text, color);
     });
 
-    mcdu.updateDisplay();
+    await mcdu.updateDisplay();
     stats.displaysRendered = 1;
     displayCache.lastUpdate = Date.now();
     log.info('Display rendered');
@@ -734,8 +734,8 @@ async function main() {
   // 2. Wait up to 3s for retained display/set from adapter
   const initialDisplay = await waitForDisplay(3000);
 
-  // 3. Open hardware + full synchronous init+render burst
-  initHardware(initialDisplay);
+  // 3. Open hardware + init+render (async — awaits control transfers on Linux)
+  await initHardware(initialDisplay);
 
   // 4. Start button polling AFTER display is rendered
   if (!CONFIG.mockMode && mcdu) {
