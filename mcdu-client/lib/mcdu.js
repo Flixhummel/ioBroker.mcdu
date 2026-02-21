@@ -142,7 +142,7 @@ class MCDU {
     // -------------------------------------------------------------------------
 
     /**
-     * Write one HID output packet.
+     * Write one HID output packet — synchronous on Mac, async on Linux.
      * packet[0] = report ID, packet[1..] = payload (total 64 bytes)
      * Returns a Promise on Linux, undefined on Mac (sync).
      */
@@ -151,9 +151,32 @@ class MCDU {
             if (!this._usbDevice) return Promise.resolve();
             return this._ctrlTransfer(packet);
         } else {
-            if (!this._hidDevice) return;
-            this._hidDevice.write(Buffer.from(packet));
+            return this._writeSync(packet);
         }
+    }
+
+    /**
+     * Synchronous write on Mac (node-hid). Always returns undefined.
+     */
+    _writeSync(packet) {
+        if (!this._hidDevice) {
+            console.error('[HID] write skipped — no device handle');
+            return;
+        }
+        const buf = Buffer.from(packet);
+        console.log(`[HID] write ${buf.length}B  reportId=0x${buf[0].toString(16).padStart(2,'0')}  first8=${buf.slice(0,8).toString('hex')}`);
+        let result;
+        try {
+            result = this._hidDevice.write(buf);
+        } catch (err) {
+            console.error(`[HID] write FAILED  reportId=0x${buf[0].toString(16).padStart(2,'0')}  error=${err.message}`);
+            console.error('[HID] write error stack:', err.stack);
+            throw err;
+        }
+        if (result !== buf.length) {
+            console.error(`[HID] write short: expected ${buf.length}B, got ${result}B`);
+        }
+        console.log(`[HID] write result: ${result}`);
     }
 
     _ctrlTransfer(packet) {
@@ -181,9 +204,12 @@ class MCDU {
     // -------------------------------------------------------------------------
 
     async initDisplay() {
-        console.log('Initializing display...');
-        for (const pkt of INIT_PACKETS) {
-            await this._write(pkt);
+        console.log(`[INIT] Starting display init — ${INIT_PACKETS.length} packets`);
+        for (let i = 0; i < INIT_PACKETS.length; i++) {
+            console.log(`[INIT] Sending packet ${i + 1}/${INIT_PACKETS.length}`);
+            this._writeSync(INIT_PACKETS[i]);
+            await new Promise(r => setTimeout(r, 10));
+            console.log(`[INIT] Packet ${i + 1} done`);
         }
         console.log('✓ Display initialized');
     }
@@ -193,24 +219,58 @@ class MCDU {
         for (let lineIdx = 0; lineIdx < this.page.length; lineIdx++) {
             const line = this.page[lineIdx];
             for (let charIdx = 0; charIdx < PAGE_CHARS_PER_LINE; charIdx++) {
-                const colorCode = COLORS[this.colors[lineIdx][charIdx]] || COLORS.W;
-                tmpArray.push(colorCode & 0xFF, (colorCode >> 8) & 0xFF, line.charCodeAt(charIdx));
+                const colorCode = COLORS.W; // TEMP: force white — testing color encoding issue
+                const charCode = line.charCodeAt(charIdx);
+                if (charCode > 0x7F) {
+                    console.error(`[DISPLAY] NON-ASCII char at line ${lineIdx} col ${charIdx}: 0x${charCode.toString(16)} ('${line[charIdx]}') — firmware will drop this frame!`);
+                }
+                tmpArray.push(colorCode & 0xFF, (colorCode >> 8) & 0xFF, charCode);
             }
         }
         // Pad to multiple of 63
         const padLength = Math.ceil(tmpArray.length / 63) * 63 - tmpArray.length;
         for (let i = 0; i < padLength; i++) tmpArray.push(0x00);
 
+        const totalPackets = tmpArray.length / 63;
+        console.log(`[DISPLAY] updateDisplay — ${totalPackets} packets, line0: "${this.page[0] ? this.page[0].trim() : ''}"`);
         for (let i = 0; i < tmpArray.length; i += 63) {
-            await this._write([0xf2, ...tmpArray.slice(i, i + 63)]);
+            const pktNum = i / 63 + 1;
+            console.log(`[DISPLAY] packet ${pktNum}/${totalPackets}`);
+            try {
+                await this._write([0xf2, ...tmpArray.slice(i, i + 63)]);
+            } catch (err) {
+                console.error(`[DISPLAY] packet ${pktNum}/${totalPackets} FAILED: ${err.message}`);
+                throw err;
+            }
             await new Promise(r => setTimeout(r, 40));
         }
+        console.log('[DISPLAY] updateDisplay done');
     }
 
     clear() {
         this.page = this._createEmptyPage();
         this.colors = this._createEmptyColorBuffer();
         return this.updateDisplay();
+    }
+
+    // -------------------------------------------------------------------------
+    // ASCII sanitization
+    // -------------------------------------------------------------------------
+
+    /**
+     * Replace non-ASCII characters with ASCII equivalents.
+     * CRITICAL: WinWing firmware silently drops the entire display frame if any
+     * character byte > 0x7F is encountered. All text MUST pass through this.
+     */
+    sanitizeAscii(text) {
+        return text
+            .replace(/[äàáâãåÄÀÁÂÃÅ]/g, c => c === c.toUpperCase() ? 'A' : 'a')
+            .replace(/[éèêëÉÈÊË]/g, c => c === c.toUpperCase() ? 'E' : 'e')
+            .replace(/[íìîïÍÌÎÏ]/g, c => c === c.toUpperCase() ? 'I' : 'i')
+            .replace(/[öóòôõÖÓÒÔÕ]/g, c => c === c.toUpperCase() ? 'O' : 'o')
+            .replace(/[üúùûÜÚÙÛ]/g, c => c === c.toUpperCase() ? 'U' : 'u')
+            .replace(/ß/g, 'ss')
+            .replace(/[^\x00-\x7F]/g, '?');
     }
 
     // -------------------------------------------------------------------------
@@ -222,7 +282,8 @@ class MCDU {
         if (Array.isArray(textOrSegments)) {
             this._setLineSegments(lineNum, textOrSegments);
         } else {
-            const padded = (textOrSegments + ' '.repeat(PAGE_CHARS_PER_LINE)).substring(0, PAGE_CHARS_PER_LINE);
+            const sanitized = this.sanitizeAscii(textOrSegments);
+            const padded = (sanitized + ' '.repeat(PAGE_CHARS_PER_LINE)).substring(0, PAGE_CHARS_PER_LINE);
             this.page[lineNum] = padded;
             const c = this._normalizeColor(color);
             for (let i = 0; i < PAGE_CHARS_PER_LINE; i++) this.colors[lineNum][i] = c;
@@ -233,7 +294,7 @@ class MCDU {
         let text = '';
         let charIdx = 0;
         for (const seg of segments) {
-            const t = seg.text || '';
+            const t = this.sanitizeAscii(seg.text || '');
             const c = this._normalizeColor(seg.color || 'W');
             for (let i = 0; i < t.length && charIdx < PAGE_CHARS_PER_LINE; i++) {
                 text += t[i];
@@ -305,7 +366,11 @@ class MCDU {
                 if (data && data.length >= 13 && data[0] === 0x01) {
                     this._processButtonData(data);
                 }
-            } catch (e) { /* device disconnect — swallow */ }
+            } catch (e) {
+                if (e.message && !e.message.includes('timeout')) {
+                    console.error('[HID] button read error:', e.message);
+                }
+            }
         }, pollIntervalMs);
     }
 

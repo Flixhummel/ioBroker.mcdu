@@ -304,7 +304,11 @@ function handleDisplaySet(data) {
     mcdu.updateDisplay().then(() => {
       displayCache.lastUpdate = Date.now();
       stats.displaysRendered++;
-    }).catch(err => log.error('Display update error:', err.message));
+    }).catch(err => {
+      log.error('Display update error:', err.message);
+      log.error('Display update error stack:', err.stack);
+      stats.errors++;
+    });
   }
 }
 
@@ -542,7 +546,7 @@ async function connectHardwareEarly() {
     log.info('MCDU connected');
     log.info('Initializing display (early, before MQTT)...');
     await mcdu.initDisplay();
-    log.info('Display blank — waiting for MQTT data');
+    log.info('Display init done');
   } catch (err) {
     log.error('Hardware early-connect failed:', err.message);
   }
@@ -555,8 +559,6 @@ async function renderInitialDisplay(displayData) {
   }
   if (!mcdu) return;
   try {
-    await mcdu.setAllLEDs(ledCache);
-
     const lines = (displayData && displayData.lines) ||
       Array(14).fill({text: '                        ', color: 'white'});
 
@@ -567,12 +569,18 @@ async function renderInitialDisplay(displayData) {
       mcdu.setLine(i, text, color);
     });
 
+    // Display FIRST (no LED writes before — they may interfere with firmware display mode)
     await mcdu.updateDisplay();
     stats.displaysRendered = 1;
     displayCache.lastUpdate = Date.now();
     log.info('Display rendered');
+
+    // LEDs after display (safe to write LED state now)
+    await mcdu.setAllLEDs(ledCache);
   } catch (err) {
     log.error('Initial display render failed:', err.message);
+    log.error('Initial display render stack:', err.stack);
+    stats.errors++;
   }
 }
 
@@ -751,16 +759,27 @@ async function main() {
   log.info('Mock mode:', CONFIG.mockMode);
   log.info('===============================');
 
-  // 1. Connect hardware FIRST — hit any firmware timing window before MQTT overhead
+  // 1. Init hardware (just init, no wait yet)
   await connectHardwareEarly();
 
-  // 2. Connect MQTT (registers handlers, subscribes)
+  // 2. Set up display data capture BEFORE connecting MQTT to avoid race condition:
+  //    The broker delivers retained display/set immediately on subscribe.
+  //    Without setting displayReadyResolve first, that message would be dropped.
+  const displayDataPromise = waitForDisplay(8000);
+
+  // 3. Connect MQTT — retained display/set will be captured by displayDataPromise
   connectMQTT();
 
-  // 3. Wait up to 3s for retained display/set from adapter
-  const initialDisplay = await waitForDisplay(3000);
+  // 4. Wait 3s for firmware to settle after init (matches test-replug.js timing).
+  //    MQTT connects and delivers retained data during this wait.
+  log.info('Waiting 3s for firmware to settle after init...');
+  await new Promise(r => setTimeout(r, 3000));
+  log.info('Firmware settle done');
 
-  // 4. Render initial display + LEDs
+  // 5. Get display data (should already be resolved from retained MQTT message)
+  const initialDisplay = await displayDataPromise;
+
+  // 6. Render initial display + LEDs
   await renderInitialDisplay(initialDisplay);
   displayCache.lastUpdate = 0; // reset throttle so next display/set always renders
 
