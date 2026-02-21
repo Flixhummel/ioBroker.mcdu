@@ -188,7 +188,7 @@
           "label": "MCDU Pages",
           "titleAttr": "name",
           "clone": true,
-          "delete": true,
+          "noDelete": false,
           "hidden": "!data.selectedDevice",
           "items": [
             {
