@@ -2,245 +2,275 @@
 
 ## Overview
 
-The MCDU adapter now supports full page configuration via the Admin UI!
+The MCDU adapter renders pages on the WinWing MCDU hardware display. Each page has up to 13 content lines (line 14 is the scratchpad). Configuration is per-device via the Admin UI.
 
-## Configuration Interface
+## Admin UI
 
-Navigate to: **Instances → mcdu.0 → Configure**
+Navigate to: **Instances > mcdu.0 > Configure**
 
-The configuration is organized into tabs:
-- **MQTT Connection** - Broker settings
-- **Pages** - Page configuration (NEW!)
-- **Display** - Display settings  
-- **Performance** - Throttling and queue settings
-- **Advanced** - Debug logging
+The configuration is organized into 4 tabs:
+- **General Settings** — MQTT broker, display, performance
+- **Device & Pages** — Select device, load/save pages, edit lines
+- **Function Keys** — Configure 11 function keys (MENU, DIR, INIT, etc.)
+- **Advanced & About** — Debug logging, version info
 
-## Adding/Editing Pages
+## Display Layout
 
-1. Go to the **Pages** tab
-2. Click the **+** button to add a new page
-3. Fill in:
-   - **Page ID** - Unique identifier (lowercase, hyphens only). Example: `lights-main`
-   - **Page Name** - Display name. Example: `Beleuchtung`
-   - **Parent Page** - Optional parent for navigation
-   - **Enabled** - Enable/disable this page
-   - **Lines (JSON)** - Click "Edit Lines" to configure page content
+```
+Row  1: ┌────────────────────────┐  Status bar (breadcrumb + time)
+Row  2: │  sub-label (cyan)      │  Sub-label for row 3
+Row  3: │ LEFT CONTENT  RIGHT    │  LSK1 line (left/right buttons)
+Row  4: │  sub-label (cyan)      │  Sub-label for row 5
+Row  5: │ LEFT CONTENT  RIGHT    │  LSK2 line
+Row  6: │  sub-label (cyan)      │  Sub-label for row 7
+Row  7: │ LEFT CONTENT  RIGHT    │  LSK3 line
+Row  8: │  sub-label (cyan)      │  Sub-label for row 9
+Row  9: │ LEFT CONTENT  RIGHT    │  LSK4 line
+Row 10: │  sub-label (cyan)      │  Sub-label for row 11
+Row 11: │ LEFT CONTENT  RIGHT    │  LSK5 line
+Row 12: │  sub-label (cyan)      │  Sub-label for row 13
+Row 13: │ LEFT CONTENT  RIGHT    │  LSK6 line / status bar
+Row 14: └────────────────────────┘  Scratchpad (user input)
+```
 
-## Line Configuration (JSON Format)
+- **Odd rows** (3, 5, 7, 9, 11, 13): main content lines, each with left/right LSK buttons
+- **Even rows** (2, 4, 6, 8, 10, 12): sub-labels (shown in cyan, above the next odd row)
+- **Row 1**: status bar showing breadcrumb navigation + time
+- **Row 14**: scratchpad for keyboard input
+- Each line is **24 characters wide**, split into left (chars 1-12) and right (chars 13-24)
 
-Each page can have up to 13 content lines (line 14 is the scratchpad).
+## Line Data Model (Left/Right)
 
-Click **"Edit Lines"** to open the JSON editor.
+Each line has two sides — `left` and `right`. Each side has:
 
-### Line Structure
+| Field | Purpose |
+|-------|---------|
+| `label` | Sub-label text (shown on the even row above, cyan) |
+| `display` | What to show on this side (label, datapoint, or empty) |
+| `button` | What happens when LSK is pressed (navigation, datapoint, or empty) |
 
+### Display Types
+
+**Label** — static text:
 ```json
-[
-  {
-    "row": 1,
-    "leftButton": {
-      "type": "navigation",
-      "action": "goto",
-      "target": "lights-dimmer",
-      "label": "DIMMER"
-    },
-    "display": {
-      "type": "label",
-      "label": "BELEUCHTUNG",
-      "color": "white",
-      "align": "left"
-    },
-    "rightButton": {
-      "type": "empty"
-    }
-  },
-  {
-    "row": 2,
-    "leftButton": {
-      "type": "empty"
-    },
-    "display": {
-      "type": "empty"
-    },
-    "rightButton": {
-      "type": "empty"
-    }
-  }
-]
+{ "type": "label", "text": "WOHNZIMMER", "color": "white" }
+```
+
+**Datapoint** — live value from ioBroker:
+```json
+{ "type": "datapoint", "source": "hm-rpc.0.ABC123.TEMPERATURE", "format": "%.1f", "unit": "C", "color": "green" }
+```
+- `source`: ioBroker state ID
+- `format`: sprintf format (auto-detected: `%.1f` for numbers, `%s` for strings)
+- `unit`: display unit (auto-detected from ioBroker object metadata)
+
+**Empty** — no content:
+```json
+{ "type": "empty" }
 ```
 
 ### Button Types
 
-**Navigation Button:**
+**Navigation** — switch to another page:
 ```json
-{
-  "type": "navigation",
-  "action": "goto",
-  "target": "target-page-id",
-  "label": "LABEL"
-}
+{ "type": "navigation", "action": "goto", "target": "klima-page" }
 ```
 
-**Data Button (toggle/increment/decrement):**
+**Datapoint** — toggle/increment/decrement an ioBroker state:
 ```json
-{
-  "type": "datapoint",
-  "action": "toggle",
-  "target": "hm-rpc.0.ABC123.STATE",
-  "label": "TOGGLE"
-}
+{ "type": "datapoint", "action": "toggle", "target": "hm-rpc.0.ABC123.STATE" }
 ```
 
-**Empty Button:**
+**Empty** — no button action:
 ```json
-{
-  "type": "empty"
-}
+{ "type": "empty" }
 ```
 
-### Display Types
+## LSK Interaction with Datapoints
 
-**Label (static text):**
-```json
-{
-  "type": "label",
-  "label": "HELLO WORLD",
-  "color": "white",
-  "align": "left"
-}
+When you press an LSK button on a line that displays a datapoint (and has no explicit button configured), the adapter uses **ioBroker object metadata** to determine what happens. No manual `editable` flag needed — the adapter reads `obj.common.write`, `obj.common.type`, `obj.common.min`, `obj.common.max` automatically.
+
+### Decision Tree
+
+```
+LSK pressed on datapoint line:
+
+  1. Is the datapoint writable? (obj.common.write)
+     NO  → Nothing happens (read-only sensor, e.g. temperature reading)
+     YES → Continue...
+
+  2. Is it a boolean? (obj.common.type === 'boolean')
+     YES → Toggle immediately: true↔false
+           No scratchpad needed. Display updates instantly.
+
+  3. Is it a number or string?
+     YES → Check scratchpad:
+           EMPTY    → Nothing happens (type something first)
+           HAS TEXT → Validate and write (see below)
 ```
 
-**Datapoint (live value):**
-```json
-{
-  "type": "datapoint",
-  "source": "javascript.0.temperature",
-  "color": "green",
-  "align": "right",
-  "format": "%.1f°C"
-}
+### Writing Values from the Scratchpad
+
+To write a value to a writable number or string datapoint:
+
+1. **Type the value** on the keypad (appears in scratchpad on line 14, e.g. `22.5*`)
+2. **Press LSK** next to the target datapoint line
+3. The adapter validates and writes:
+
+| Situation | Result |
+|-----------|--------|
+| Valid number within range | Value written, scratchpad cleared, "GESPEICHERT" shown |
+| Non-numeric text for number field | `FORMAT ERROR` shown in scratchpad |
+| Number outside min/max range | `ENTRY OUT OF RANGE` shown in scratchpad |
+| String value | Written as-is, scratchpad cleared |
+
+### Error Handling (Airbus Pattern)
+
+Errors follow the real Airbus MCDU convention:
+
+- **Errors appear in the scratchpad** (line 14) in white text — not on a separate line
+- **No auto-timeout** — the error stays until you press CLR
+- **CLR once** → restores your rejected input (so you can edit and retry)
+- **CLR twice** → clears the scratchpad completely
+
+**Example flow:**
+```
+1. Type "999" into scratchpad        → Scratchpad: "999*"
+2. Press LSK on temperature (max 30) → Scratchpad: "ENTRY OUT OF RANGE"
+3. Press CLR                          → Scratchpad: "999*"  (restored!)
+4. Clear and type "22.5"             → Scratchpad: "22.5*"
+5. Press LSK again                    → Value written, "GESPEICHERT"
 ```
 
-**Empty:**
-```json
-{
-  "type": "empty"
-}
+### Boolean Toggle Example
+
+```
+Line 5 shows: "LICHT KUECHE    AN"  (source: hm-rpc.0.ABC.STATE, boolean, writable)
+
+1. Press LSK5L → value toggles to false
+2. Display updates: "LICHT KUECHE   AUS"
+3. Press LSK5L again → value toggles to true
 ```
 
-### Colors
+No scratchpad involved for booleans — it's a direct toggle.
 
-Available colors: `white`, `green`, `blue`, `amber`, `red`
+## Navigation
 
-### Alignment
+### Breadcrumb (Status Bar)
 
-Available alignments: `left`, `center`, `right`
+Row 1 shows the navigation path: `HOME > KLIMA > WOHNZIMMER 14:30`
 
-## Example: Complete 3-Page Configuration
+Set `parent` on pages to build the navigation hierarchy.
 
-### Page 1: Main Menu
+### CLR Key
+
+- **Scratchpad has content** → clears scratchpad (or restores after error)
+- **Scratchpad empty** → navigates to parent page
+- **Double-CLR** (within 1 second) → emergency exit to home page
+
+### SLEW Keys (Left/Right arrows)
+
+Circular navigation through sibling pages (pages with the same parent).
+
+### Function Keys
+
+11 configurable function keys (MENU, INIT, DIR, FPLN, PERF, PROG, SEC, ATC, AIRPORT, DATA, RAD NAV). Each can be mapped to:
+- `navigateHome` — go to home page
+- `navigateTo` — go to a specific page
+- Disabled — no action
+
+PREV PAGE / NEXT PAGE handle pagination (built-in, not configurable).
+
+## Colors
+
+Available display colors: `white`, `green`, `cyan`, `blue`, `amber`, `red`, `magenta`, `yellow`, `grey`
+
+Note: `blue` and `cyan` render identically on WinWing hardware.
+
+## Page Example (Current Format)
+
 ```json
 {
-  "id": "home-main",
-  "name": "Hauptmenü",
-  "parent": null,
-  "enabled": true,
+  "id": "klima-wohnzimmer",
+  "name": "Wohnzimmer",
+  "parent": "klima-main",
+  "layoutType": "data",
   "lines": [
     {
-      "row": 1,
-      "leftButton": {"type": "navigation", "action": "goto", "target": "lights-main", "label": "LIGHTS"},
-      "display": {"type": "label", "label": "BELEUCHTUNG", "color": "white", "align": "left"},
-      "rightButton": {"type": "empty"}
-    },
-    {
       "row": 3,
-      "leftButton": {"type": "navigation", "action": "goto", "target": "climate-main", "label": "CLIMATE"},
-      "display": {"type": "label", "label": "KLIMA", "color": "white", "align": "left"},
-      "rightButton": {"type": "empty"}
+      "left": {
+        "label": "IST-TEMPERATUR",
+        "display": { "type": "datapoint", "source": "hm-rpc.0.T1.TEMPERATURE", "color": "green" },
+        "button": { "type": "empty" }
+      },
+      "right": {
+        "label": "SOLLWERT",
+        "display": { "type": "datapoint", "source": "hm-rpc.0.T1.SET_TEMPERATURE", "color": "amber" },
+        "button": { "type": "empty" }
+      }
     },
     {
       "row": 5,
-      "leftButton": {"type": "navigation", "action": "goto", "target": "status-main", "label": "STATUS"},
-      "display": {"type": "label", "label": "SYSTEM STATUS", "color": "white", "align": "left"},
-      "rightButton": {"type": "empty"}
+      "left": {
+        "label": "LUFTFEUCHTE",
+        "display": { "type": "datapoint", "source": "hm-rpc.0.H1.HUMIDITY", "color": "white" },
+        "button": { "type": "empty" }
+      },
+      "right": {
+        "label": "",
+        "display": { "type": "empty" },
+        "button": { "type": "empty" }
+      }
+    },
+    {
+      "row": 7,
+      "left": {
+        "label": "",
+        "display": { "type": "label", "text": "LICHT KUECHE" },
+        "button": { "type": "empty" }
+      },
+      "right": {
+        "label": "",
+        "display": { "type": "datapoint", "source": "hm-rpc.0.L1.STATE" },
+        "button": { "type": "empty" }
+      }
     }
   ]
 }
 ```
 
-### Page 2: Lights Control
-```json
-{
-  "id": "lights-main",
-  "name": "Beleuchtung",
-  "parent": "home-main",
-  "enabled": true,
-  "lines": [
-    {
-      "row": 1,
-      "leftButton": {"type": "datapoint", "action": "toggle", "target": "hm-rpc.0.ABC123.STATE", "label": "TOGGLE"},
-      "display": {"type": "label", "label": "WOHNZIMMER", "color": "white", "align": "left"},
-      "rightButton": {"type": "datapoint", "action": "toggle", "target": "hm-rpc.0.ABC123.STATE"}
-    },
-    {
-      "row": 3,
-      "leftButton": {"type": "datapoint", "action": "toggle", "target": "hm-rpc.0.DEF456.STATE", "label": "TOGGLE"},
-      "display": {"type": "label", "label": "KÜCHE", "color": "white", "align": "left"},
-      "rightButton": {"type": "datapoint", "action": "toggle", "target": "hm-rpc.0.DEF456.STATE"}
-    },
-    {
-      "row": 11,
-      "leftButton": {"type": "navigation", "action": "goto", "target": "home-main", "label": "BACK"},
-      "display": {"type": "empty"},
-      "rightButton": {"type": "empty"}
-    }
-  ]
-}
-```
+In this example:
+- Row 3 left: shows current temperature (read-only sensor → LSK does nothing)
+- Row 3 right: shows setpoint (writable number → type value in scratchpad, press LSK to write)
+- Row 7 right: shows light state (writable boolean → press LSK to toggle)
 
-### Page 3: Climate Control
-```json
-{
-  "id": "climate-main",
-  "name": "Klima",
-  "parent": "home-main",
-  "enabled": true,
-  "lines": [
-    {
-      "row": 1,
-      "leftButton": {"type": "datapoint", "action": "decrement", "target": "hm-rpc.0.TEMP123.SET_TEMPERATURE"},
-      "display": {"type": "datapoint", "source": "hm-rpc.0.TEMP123.ACTUAL_TEMPERATURE", "format": "%.1f°C", "color": "green", "align": "center"},
-      "rightButton": {"type": "datapoint", "action": "increment", "target": "hm-rpc.0.TEMP123.SET_TEMPERATURE"}
-    },
-    {
-      "row": 11,
-      "leftButton": {"type": "navigation", "action": "goto", "target": "home-main", "label": "BACK"},
-      "display": {"type": "empty"},
-      "rightButton": {"type": "empty"}
-    }
-  ]
-}
-```
+Format and unit are auto-detected from ioBroker object metadata. You only need to set `source`.
+
+## Test Data
+
+Use the "Create Sample Data" button in the Admin UI (Advanced tab) to create test states under `0_userdata.0.mcdu_test`. This creates:
+
+| State | Type | Writable | Min/Max |
+|-------|------|----------|---------|
+| `temperature_living` | number | no | — |
+| `light_kitchen` | boolean | yes | — |
+| `light_living_dimmer` | number | yes | 0-100 |
+| `setpoint_living` | number | yes | 5-30 |
+| `setpoint_bedroom` | number | yes | 5-30 |
+| `text_status` | string | yes | — |
+| `window_bedroom` | boolean | no | — |
+
+Use these to test LSK interactions:
+- LSK on `light_kitchen` → toggles boolean
+- Type "22" + LSK on `setpoint_living` → writes 22.0
+- Type "999" + LSK on `setpoint_living` → "ENTRY OUT OF RANGE"
+- LSK on `temperature_living` → nothing (read-only)
 
 ## Tips
 
-1. **Start simple** - Begin with basic label pages, then add datapoints
-2. **Test incrementally** - Add one page at a time and test
-3. **Use parent navigation** - Set parent pages for automatic breadcrumb navigation
-4. **Row numbers** - Use odd rows (1, 3, 5, 7, 9, 11) for main content, even rows for spacing
-5. **Always provide a back button** - Use row 11 or 12 for navigation back to parent
-
-## Validation
-
-The admin UI validates:
-- Page IDs (must be lowercase with hyphens)
-- JSON syntax in line configuration
-- Required fields
-
-## Next Steps
-
-After configuring pages:
-1. Save the configuration
-2. Restart the adapter
-3. Test navigation on your MCDU hardware
-4. Iterate and refine!
+1. **Start simple** — begin with label pages, then add datapoints
+2. **Use parent navigation** — set `parent` for automatic breadcrumb and CLR-back
+3. **Odd rows only** — use rows 3, 5, 7, 9, 11 for main content (even rows are sub-labels)
+4. **ASCII only** — the hardware display cannot render umlauts or special characters. Use "KUECHE" not "Kuche", "ZURUECK" not "Zuruck". The adapter sanitizes automatically but it's cleaner to use ASCII in your config.
+5. **No `editable` flag needed** — the adapter reads writability from ioBroker object metadata automatically
+6. **format/unit auto-detection** — if you don't specify `format` or `unit`, they're read from the ioBroker object
