@@ -1076,15 +1076,6 @@ class McduAdapter extends utils.Adapter {
             // Flatten lines for Admin UI table
             const flatPages = flattenPages(pages);
 
-            // Debug: log flat datapoint fields to verify resolve worked
-            for (const p of flatPages) {
-                for (const l of (p.lines || [])) {
-                    if (l.leftButtonType === 'datapoint' && l.leftSource) {
-                        this.log.info(`loadDevicePages FLAT: page=${p.id} leftSource=${l.leftSource} leftFormat=${l.leftFormat} leftUnit=${l.leftUnit}`);
-                    }
-                }
-            }
-
             // Also load function keys for this device (fall back to adapter config)
             const fkStateId = `devices.${deviceId}.config.functionKeys`;
             const fkState = await this.getStateAsync(fkStateId);
