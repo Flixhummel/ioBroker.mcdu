@@ -60,7 +60,10 @@ MQTT_CLIENT_ID=mcdu-client-mac         # Client ID (auto-derived from hostname i
 
 2. **40ms between display packets**: The firmware needs 40ms between consecutive `0xf2` display packets. Sending faster causes rendering to be unreliable or silently dropped.
 
-3. **ASCII only**: All character bytes sent to the display MUST be ≤ 0x7F. The firmware silently drops the entire display frame if any byte > 0x7F is encountered. The ioBroker adapter sanitizes text before publishing, but any direct test scripts must also ensure ASCII-only output.
+3. **ASCII only**: All character bytes sent to the display MUST be ≤ 0x7F. The firmware silently drops the entire display frame if any byte > 0x7F is encountered — with no error, no acknowledgement, display just freezes. This is handled in two layers:
+   - **Adapter** (`lib/rendering/PageRenderer.sanitizeAscii()`): sanitizes status bar / breadcrumb text
+   - **Client** (`lib/mcdu.js sanitizeAscii()`): sanitizes all line content in `setLine()` and `_setLineSegments()`
+   Any direct test scripts that write to the display must also ensure ASCII-only output.
 
 4. **LEDs after display**: Always write LED state after the display update, not before.
 
@@ -106,7 +109,13 @@ The firmware ignores init packets after the first USB power cycle. **Physical un
 
 ### Display freezes when navigating pages
 
-Non-ASCII characters in display text cause the firmware to drop frames. The ioBroker adapter's `PageRenderer.sanitizeAscii()` handles this for page names and status bar text. If you see freezing, check for non-ASCII chars in your page configuration.
+The WinWing firmware silently drops the entire display frame when any character byte > 0x7F is encountered. The display stays frozen on the previous page with no error message.
+
+Non-ASCII characters can appear in two places:
+- **Status bar / breadcrumb**: page names like "Hauptmenü" → sanitized by `PageRenderer.sanitizeAscii()` in the adapter
+- **Line content**: button labels like "Zurück" → sanitized by `mcdu.sanitizeAscii()` in `setLine()` before writing
+
+If display freezing recurs, look for `[DISPLAY] NON-ASCII char at line X col Y` in the client log — this means a character bypassed `setLine()` and will cause a frame drop.
 
 ### Display renders correctly on Mac but not on Linux/Pi
 
