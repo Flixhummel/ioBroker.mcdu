@@ -220,11 +220,15 @@ class MCDU {
             const line = this.page[lineIdx];
             for (let charIdx = 0; charIdx < PAGE_CHARS_PER_LINE; charIdx++) {
                 const colorCode = COLORS[this.colors[lineIdx][charIdx]] || COLORS.W;
-                const charCode = line.charCodeAt(charIdx);
+                const char = line[charIdx] || ' ';
+                const charCode = char.charCodeAt(0);
+                // Multi-byte UTF-8 characters (degree, arrows, etc.) — firmware supports them natively
                 if (charCode > 0x7F) {
-                    console.error(`[DISPLAY] NON-ASCII char at line ${lineIdx} col ${charIdx}: 0x${charCode.toString(16)} ('${line[charIdx]}') — firmware will drop this frame!`);
+                    const utf8Bytes = Buffer.from(char, 'utf8');
+                    tmpArray.push(colorCode & 0xFF, (colorCode >> 8) & 0xFF, ...utf8Bytes);
+                } else {
+                    tmpArray.push(colorCode & 0xFF, (colorCode >> 8) & 0xFF, charCode);
                 }
-                tmpArray.push(colorCode & 0xFF, (colorCode >> 8) & 0xFF, charCode);
             }
         }
         // Pad to multiple of 63
@@ -258,9 +262,10 @@ class MCDU {
     // -------------------------------------------------------------------------
 
     /**
-     * Replace non-ASCII characters with ASCII equivalents.
-     * CRITICAL: WinWing firmware silently drops the entire display frame if any
-     * character byte > 0x7F is encountered. All text MUST pass through this.
+     * Replace unsupported non-ASCII characters with ASCII equivalents.
+     * WinWing firmware supports a limited set of multi-byte UTF-8 characters:
+     * °, Δ, ←, ↑, →, ↓, ▶, ◀, □, ◇
+     * All other non-ASCII is replaced to prevent display frame drops.
      */
     sanitizeAscii(text) {
         return text
@@ -270,7 +275,7 @@ class MCDU {
             .replace(/[öóòôõÖÓÒÔÕ]/g, c => c === c.toUpperCase() ? 'O' : 'o')
             .replace(/[üúùûÜÚÙÛ]/g, c => c === c.toUpperCase() ? 'U' : 'u')
             .replace(/ß/g, 'ss')
-            .replace(/[^\x00-\x7F]/g, '?');
+            .replace(/[^\x00-\x7F°Δ←↑→↓▶◀□◇]/g, '?');
     }
 
     // -------------------------------------------------------------------------
