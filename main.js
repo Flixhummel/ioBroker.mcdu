@@ -1465,11 +1465,13 @@ class McduAdapter extends utils.Adapter {
                 const pages = JSON.parse(state.val);
                 if (Array.isArray(pages) && pages.length > 0) {
                     // Migrate old row numbers if needed
+                    let needsPersist = false;
                     const migratedPages = pages.map(page => {
                         if (page.lines) {
                             const migrated = migrateOldRows(page.lines);
                             if (migrated !== page.lines) {
                                 this.log.info(`Migrated page ${page.id} lines from old row format`);
+                                needsPersist = true;
                                 return { ...page, lines: migrated };
                             }
                         }
@@ -1477,6 +1479,13 @@ class McduAdapter extends utils.Adapter {
                     });
                     this.config.pages = migratedPages;
                     this.log.info(`Loaded ${migratedPages.length} pages from device ${deviceId}`);
+
+                    // Persist migrated data so old-format rows don't recur
+                    if (needsPersist) {
+                        const stateId = `devices.${deviceId}.config.pages`;
+                        await this.setStateAsync(stateId, JSON.stringify(migratedPages), true);
+                        this.log.info(`Persisted migrated pages for device ${deviceId}`);
+                    }
                 }
             }
 
