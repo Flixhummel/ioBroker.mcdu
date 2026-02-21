@@ -14,7 +14,7 @@
           "row": 5,
           "left": {
             "label": "",
-            "display": { "type": "label", "text": "HOME AUTOMATION", "color": "green" },
+            "display": { "type": "label", "text": "HOME AUTOMATION", "colData": "green" },
             "button": { "type": "navigation", "action": "goto", "target": "lights-main" }
           },
           "right": {
@@ -27,7 +27,7 @@
           "row": 7,
           "left": {
             "label": "",
-            "display": { "type": "label", "text": "Climate Control", "color": "white" },
+            "display": { "type": "label", "text": "Climate Control", "colData": "white" },
             "button": { "type": "navigation", "action": "goto", "target": "climate-main" }
           },
           "right": {
@@ -40,7 +40,7 @@
           "row": 9,
           "left": {
             "label": "",
-            "display": { "type": "label", "text": "Security System", "color": "white" },
+            "display": { "type": "label", "text": "Security System", "colData": "white" },
             "button": { "type": "navigation", "action": "goto", "target": "security-main" }
           },
           "right": {
@@ -53,7 +53,7 @@
           "row": 11,
           "left": {
             "label": "",
-            "display": { "type": "label", "text": "System Status", "color": "white" },
+            "display": { "type": "label", "text": "System Status", "colData": "white" },
             "button": { "type": "navigation", "action": "goto", "target": "status-main" }
           },
           "right": {
@@ -73,7 +73,7 @@
           "row": 5,
           "left": {
             "label": "WOHNZIMMER",
-            "display": { "type": "datapoint", "text": "Living Room", "source": "", "format": "%s", "color": "white" },
+            "display": { "type": "datapoint", "text": "Living Room", "source": "", "format": "%s", "colData": "white" },
             "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
           "right": {
@@ -86,7 +86,7 @@
           "row": 7,
           "left": {
             "label": "KUECHE",
-            "display": { "type": "datapoint", "text": "Kitchen", "source": "", "format": "%s", "color": "white" },
+            "display": { "type": "datapoint", "text": "Kitchen", "source": "", "format": "%s", "colData": "white" },
             "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
           "right": {
@@ -99,7 +99,7 @@
           "row": 9,
           "left": {
             "label": "SCHLAFZIMMER",
-            "display": { "type": "datapoint", "text": "Bedroom", "source": "", "format": "%s", "color": "white" },
+            "display": { "type": "datapoint", "text": "Bedroom", "source": "", "format": "%s", "colData": "white" },
             "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
           "right": {
@@ -119,7 +119,7 @@
           "row": 5,
           "left": {
             "label": "WOHNZIMMER",
-            "display": { "type": "datapoint", "text": "Living", "source": "", "format": "%.1f", "unit": "C", "color": "white" },
+            "display": { "type": "datapoint", "text": "Living", "source": "", "format": "%.1f", "unit": "C", "colData": "white" },
             "button": { "type": "navigation", "action": "goto", "target": "climate-living" }
           },
           "right": {
@@ -132,7 +132,7 @@
           "row": 7,
           "left": {
             "label": "SCHLAFZIMMER",
-            "display": { "type": "datapoint", "text": "Bedroom", "source": "", "format": "%.1f", "unit": "C", "color": "white" },
+            "display": { "type": "datapoint", "text": "Bedroom", "source": "", "format": "%.1f", "unit": "C", "colData": "white" },
             "button": { "type": "navigation", "action": "goto", "target": "climate-bedroom" }
           },
           "right": {
@@ -152,7 +152,7 @@
           "row": 5,
           "left": {
             "label": "",
-            "display": { "type": "datapoint", "text": "Alarm System", "source": "", "format": "%s", "color": "amber" },
+            "display": { "type": "datapoint", "text": "Alarm System", "source": "", "format": "%s", "colData": "amber" },
             "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
           "right": {
@@ -165,7 +165,7 @@
           "row": 7,
           "left": {
             "label": "",
-            "display": { "type": "datapoint", "text": "Front Door", "source": "", "format": "%s", "color": "white" },
+            "display": { "type": "datapoint", "text": "Front Door", "source": "", "format": "%s", "colData": "white" },
             "button": { "type": "empty" }
           },
           "right": {
@@ -185,7 +185,7 @@
           "row": 5,
           "left": {
             "label": "",
-            "display": { "type": "label", "text": "SYSTEM STATUS", "color": "green" },
+            "display": { "type": "label", "text": "SYSTEM STATUS", "colData": "green" },
             "button": { "type": "empty" }
           },
           "right": {

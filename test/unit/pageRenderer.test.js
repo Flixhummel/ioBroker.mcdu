@@ -18,17 +18,17 @@ describe('PageRenderer', () => {
                     lines: [
                         {
                             row: 3,
-                            left: { label: '', display: { type: 'label', text: 'WELCOME', color: 'white' }, button: { type: 'empty' } },
+                            left: { label: '', display: { type: 'label', text: 'WELCOME', colData: 'white' }, button: { type: 'empty' } },
                             right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
                         },
                         {
                             row: 5,
-                            left: { label: 'TEMPERATUR', display: { type: 'label', text: '21.5 C', color: 'white' }, button: { type: 'empty' } },
+                            left: { label: 'TEMPERATUR', display: { type: 'label', text: '21.5 C', colData: 'white' }, button: { type: 'empty' } },
                             right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
                         },
                         {
                             row: 7,
-                            left: { label: '', display: { type: 'label', text: 'LIGHTS', color: 'white' }, button: { type: 'empty' } },
+                            left: { label: '', display: { type: 'label', text: 'LIGHTS', colData: 'white' }, button: { type: 'empty' } },
                             right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
                         }
                     ]
@@ -80,18 +80,18 @@ describe('PageRenderer', () => {
                     lines: [
                         {
                             row: 3,
-                            left: { label: 'LINKS', display: { type: 'label', text: 'Decke', color: 'white' }, button: { type: 'empty' } },
-                            right: { label: 'RECHTS', display: { type: 'label', text: 'AN', color: 'green' }, button: { type: 'empty' } }
+                            left: { label: 'LINKS', display: { type: 'label', text: 'Decke', colData: 'white' }, button: { type: 'empty' } },
+                            right: { label: 'RECHTS', display: { type: 'label', text: 'AN', colData: 'green' }, button: { type: 'empty' } }
                         },
                         {
                             row: 5,
-                            left: { label: '', display: { type: 'label', text: 'Only Left', color: 'white' }, button: { type: 'empty' } },
+                            left: { label: '', display: { type: 'label', text: 'Only Left', colData: 'white' }, button: { type: 'empty' } },
                             right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
                         },
                         {
                             row: 7,
                             left: { label: '', display: { type: 'empty' }, button: { type: 'empty' } },
-                            right: { label: '', display: { type: 'label', text: 'Only Right', color: 'amber' }, button: { type: 'empty' } }
+                            right: { label: '', display: { type: 'label', text: 'Only Right', colData: 'amber' }, button: { type: 'empty' } }
                         }
                     ]
                 },
@@ -207,8 +207,8 @@ describe('PageRenderer', () => {
                 lines: [
                     {
                         row: 3,
-                        left: { label: '', display: { type: 'label', text: 'LEFT', color: 'green' }, button: { type: 'empty' } },
-                        right: { label: '', display: { type: 'label', text: 'RIGHT', color: 'green' }, button: { type: 'empty' } }
+                        left: { label: '', display: { type: 'label', text: 'LEFT', colData: 'green' }, button: { type: 'empty' } },
+                        right: { label: '', display: { type: 'label', text: 'RIGHT', colData: 'green' }, button: { type: 'empty' } }
                     }
                 ]
             });
