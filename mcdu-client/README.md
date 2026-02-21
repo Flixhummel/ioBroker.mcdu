@@ -1,306 +1,154 @@
 # MCDU MQTT Client
 
-**Phase 3a:** Hardware bridge between WINWING MCDU-32-CAPTAIN and MQTT broker.
+Hardware bridge between WINWING MCDU-32-CAPTAIN and MQTT broker. Acts as a "dumb terminal" — no business logic, just USB HID ↔ MQTT.
 
-## Overview
+## Architecture
 
-This client acts as a "dumb terminal" that:
-- Reads button presses from MCDU hardware
-- Publishes button events to MQTT
-- Subscribes to display/LED commands from MQTT
-- Sends updates to MCDU hardware
-
-**Architecture:**
 ```
-┌─────────────────┐      MQTT       ┌──────────────────┐
-│   ioBroker      │ ◄─────────────► │  mcdu-client.js  │
-│   (Phase 3b)    │   (topics)      │   (this file)    │
-└─────────────────┘                 └──────────────────┘
-                                            │
-                                            │ USB HID
-                                            ▼
-                                    ┌──────────────┐
-                                    │  MCDU-32-    │
-                                    │  CAPTAIN     │
-                                    └──────────────┘
+┌─────────────────┐      MQTT       ┌──────────────────┐      USB HID     ┌──────────────┐
+│   ioBroker      │ ◄─────────────► │  mcdu-client.js  │ ◄──────────────► │  MCDU-32-    │
+│   Adapter       │                 │                  │                  │  CAPTAIN     │
+└─────────────────┘                 └──────────────────┘                  └──────────────┘
 ```
 
-**Optimized for:** Raspberry Pi 1 Model B Rev 2 (ARMv6, 512MB RAM)
+## Hardware Support
 
-## Installation
+- **macOS**: `node-hid` backend (IOHIDManager → SET_REPORT control transfers) ✓
+- **Linux/Raspberry Pi**: `usb` backend (libusb → controlTransfer) ✓
 
-### 1. Prerequisites
+> **Critical:** The WinWing firmware requires SET_REPORT control transfers, NOT interrupt OUT writes. Linux hidraw/libusb default to interrupt OUT and are silently ignored by the firmware.
+
+## Quick Start
+
+### macOS (development)
 
 ```bash
-# Raspberry Pi OS Lite (Legacy, 32-bit) recommended
-# Node.js v12.x (last ARMv6-compatible version)
-
-curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
-sudo apt-get install -y nodejs
-
-# Verify
-node --version  # Should be v12.x
+cd mcdu-client
+npm install
+node mcdu-client.js
 ```
 
-### 2. Install Dependencies
+`config.env` is loaded automatically. Edit it to set the MQTT broker address.
+
+### Raspberry Pi (production)
 
 ```bash
 cd /home/pi/mcdu-client
 npm install
-```
-
-### 3. Copy Hardware Driver
-
-```bash
-# Copy mcdu.js and button-map.json from Phase 2
-cp ../nodejs-test/mcdu.js .
-cp ../nodejs-test/button-map.json .
-```
-
-### 4. Configure
-
-```bash
-cp config.env.template config.env
-nano config.env  # Edit MQTT broker URL, credentials, etc.
-```
-
-**Minimum required:**
-```bash
-MQTT_BROKER=mqtt://192.168.1.100:1883
-```
-
-## Usage
-
-### Run Manually
-
-```bash
-# Load config from config.env
-export $(cat config.env | xargs)
-
-# Start client
-node mcdu-client.js
-```
-
-### Run with systemd (Recommended)
-
-```bash
-# Copy service file
-sudo cp mcdu-client.service /etc/systemd/system/
-
-# Enable and start
 sudo systemctl enable mcdu-client
 sudo systemctl start mcdu-client
-
-# Check status
-sudo systemctl status mcdu-client
-
-# View logs
 sudo journalctl -u mcdu-client -f
 ```
 
-### Mock Mode (Testing without Hardware)
+## Configuration
+
+Edit `config.env`:
 
 ```bash
-# Test MQTT connectivity without MCDU connected
-MOCK_MODE=true node mcdu-client.js
+MQTT_BROKER=mqtt://10.10.5.149:1883   # MQTT broker address
+MQTT_TOPIC_PREFIX=mcdu                 # Topic prefix (default: mcdu)
+MQTT_CLIENT_ID=mcdu-client-mac         # Client ID (auto-derived from hostname if blank)
+```
 
-# Generates fake button events every 5 seconds
-# Logs received MQTT messages
+`config.env` is loaded via dotenv at startup. On Raspberry Pi, the systemd `EnvironmentFile=` takes precedence over `config.env`.
+
+## Display Protocol (WinWing Firmware)
+
+### Critical constraints
+
+1. **One-shot init**: The firmware only accepts `0xf0` init packets **once per USB power cycle**. After a software close/reopen the init is silently ignored. Open the device once and never close it.
+
+2. **40ms between display packets**: The firmware needs 40ms between consecutive `0xf2` display packets. Sending faster causes rendering to be unreliable or silently dropped.
+
+3. **ASCII only**: All character bytes sent to the display MUST be ≤ 0x7F. The firmware silently drops the entire display frame if any byte > 0x7F is encountered. The ioBroker adapter sanitizes text before publishing, but any direct test scripts must also ensure ASCII-only output.
+
+4. **LEDs after display**: Always write LED state after the display update, not before.
+
+### Startup sequence
+
+```
+1. Open HID device once
+2. initDisplay()       — 17 × 0xf0 packets, 10ms between each
+3. wait 200ms          — firmware settle
+4. clear()             — 16 × 0xf2 WHITE+spaces → WinWing logo disappears
+5. Connect MQTT        — in parallel with settle wait
+6. wait ~3s total      — firmware fully settled
+7. Receive display/set → updateDisplay() → setAllLEDs()
 ```
 
 ## MQTT Topics
 
-See **[../PHASE3A-SPEC.md](../PHASE3A-SPEC.md)** for complete specification.
+All topics are prefixed with `{MQTT_TOPIC_PREFIX}/{deviceId}/`.
 
-### Commands (Subscribe - Client Receives)
+### Client receives (adapter → client)
 
-| Topic | Purpose | Example |
-|-------|---------|---------|
-| `mcdu/display/set` | Full display update (14 lines) | `{"lines":[{"text":"LINE 1","color":"white"},...]}` |
-| `mcdu/display/line` | Single line update | `{"lineNumber":1,"text":"HELLO","color":"amber"}` |
-| `mcdu/display/clear` | Clear display | `{}` |
-| `mcdu/leds/set` | Set all LEDs | `{"leds":{"RDY":true,"FAIL":false,...}}` |
-| `mcdu/leds/single` | Set single LED | `{"name":"RDY","state":true}` |
-| `mcdu/status/ping` | Health check | `{"requestId":"uuid"}` |
+| Topic | Purpose |
+|-------|---------|
+| `display/set` | Full display update (14 lines, retained) |
+| `display/line` | Single line update |
+| `leds/set` | Set all LEDs |
+| `leds/single` | Set single LED |
+| `status/ping` | Health check request |
 
-### Events (Publish - Client Sends)
+### Client publishes (client → adapter)
 
-| Topic | Purpose | Example |
-|-------|---------|---------|
-| `mcdu/buttons/event` | Button press/release | `{"button":"LSK1L","action":"press","timestamp":...}` |
-| `mcdu/status/online` | Online/offline status (LWT) | `{"status":"online","hostname":"raspberrypi",...}` |
-| `mcdu/status/pong` | Health check response | `{"requestId":"uuid","uptime":3600,...}` |
-| `mcdu/status/error` | Hardware errors | `{"error":"Device disconnected","code":"...",...}` |
-
-## Testing
-
-### 1. MQTT Connectivity (No MCDU)
-
-```bash
-# Terminal 1: Start in mock mode
-MOCK_MODE=true node mcdu-client.js
-
-# Terminal 2: Send test display update
-mosquitto_pub -h localhost -t mcdu/display/line -m '{"lineNumber":1,"text":"HELLO MCDU","color":"amber"}'
-
-# Terminal 3: Monitor button events (mock generates events every 5s)
-mosquitto_sub -h localhost -t mcdu/buttons/event -v
-```
-
-**Success:** Client connects, receives messages, publishes mock events.
-
-### 2. Hardware Integration (MCDU Connected)
-
-```bash
-# Terminal 1: Start client
-node mcdu-client.js
-
-# Terminal 2: Send display update
-mosquitto_pub -h localhost -t mcdu/display/set -m '{
-  "lines": [
-    {"text":"LINE 1 TEXT HERE      ","color":"white"},
-    {"text":"LINE 2 TEXT HERE      ","color":"amber"},
-    {"text":"LINE 3 TEXT HERE      ","color":"cyan"},
-    ...
-  ]
-}'
-
-# Terminal 3: Monitor button events (press physical buttons)
-mosquitto_sub -h localhost -t mcdu/buttons/event -v
-
-# Terminal 4: Control LEDs
-mosquitto_pub -h localhost -t mcdu/leds/set -m '{"leds":{"RDY":true,"FAIL":false}}'
-```
-
-**Success:** Display updates, buttons work, LEDs respond.
-
-### 3. Performance Test (Pi 1)
-
-```bash
-# Stress test: 600 display updates (10/sec for 60 seconds)
-for i in {1..600}; do
-  mosquitto_pub -h localhost -t mcdu/display/line -m "{\"lineNumber\":1,\"text\":\"UPDATE $i\",\"color\":\"white\"}"
-  sleep 0.1
-done
-
-# Monitor CPU/memory
-htop
-```
-
-**Expected:** CPU <80%, memory stable, buttons still responsive.
-
-### 4. Stability Test (24h)
-
-```bash
-# Run in background
-nohup node mcdu-client.js > /dev/null 2>&1 &
-
-# Send test message every 5 minutes
-watch -n 300 'mosquitto_pub -h localhost -t mcdu/display/line -m "{\"lineNumber\":14,\"text\":\"ALIVE $(date +%H:%M)\",\"color\":\"green\"}"'
-
-# Check uptime
-mosquitto_pub -h localhost -t mcdu/status/ping -m '{"requestId":"test"}'
-mosquitto_sub -h localhost -t mcdu/status/pong -C 1 -v
-```
-
-**Success:** Runs 24h without crashes, no memory leaks, auto-reconnects if broker restarts.
-
-## Configuration Reference
-
-See `config.env.template` for all options.
-
-**Performance tuning (Pi 1):**
-- `BUTTON_POLL_RATE=50` - Lower = less CPU (default: 50Hz, standard: 100Hz)
-- `DISPLAY_THROTTLE=100` - Max 10 updates/sec (prevents flood)
-- `LED_THROTTLE=50` - Max 20 updates/sec
-
-**Logging:**
-- `LOG_LEVEL=debug` - Verbose (shows all MQTT messages, throttling, etc.)
-- `LOG_LEVEL=info` - Normal (startup, connect, errors)
-- `LOG_BUTTONS=true` - Log every button press/release (very noisy)
+| Topic | Purpose |
+|-------|---------|
+| `buttons/event` | Button press events |
+| `status/online` | Online announcement (LWT) |
+| `status/pong` | Health check response |
 
 ## Troubleshooting
 
-### "Cannot find module 'mqtt'"
+### Display stuck on WinWing boot screen after software restart
 
+The firmware ignores init packets after the first USB power cycle. **Physical unplug/replug required** to reset firmware state. This is by design — the client is meant to run as a persistent service that opens the device once.
+
+### Display freezes when navigating pages
+
+Non-ASCII characters in display text cause the firmware to drop frames. The ioBroker adapter's `PageRenderer.sanitizeAscii()` handles this for page names and status bar text. If you see freezing, check for non-ASCII chars in your page configuration.
+
+### Display renders correctly on Mac but not on Linux/Pi
+
+On Linux, verify the `usb` npm package is installed and that the udev rule grants access:
 ```bash
-npm install
-```
-
-### "HID device not found"
-
-```bash
-# Check USB connection
+# Should show the MCDU
 lsusb | grep 4098
 
-# Should show: Bus 001 Device 005: ID 4098:bb36
+# Check udev rule exists
+cat /etc/udev/rules.d/99-winwing.rules
 ```
 
-### "MQTT connection refused"
+### Colors not rendering (text appears white)
+
+Known issue: color encoding for some colors (GREEN, MAGENTA, RED, YELLOW) appears broken. A temporary hack in `lib/mcdu.js` forces all text to WHITE. This does not affect navigation or display content.
+
+### HID device not found
 
 ```bash
-# Check broker is running
-systemctl status mosquitto
-
-# Check firewall
-sudo ufw status
-
-# Test broker
-mosquitto_pub -h localhost -t test -m "hello"
-mosquitto_sub -h localhost -t test -C 1
+lsusb | grep 4098
+# Should show: Bus 001 Device 005: ID 4098:bb36 WinWing MCDU
 ```
 
-### Display shows text in wrong position
+### MQTT connection refused
 
-- This client uses full-screen buffer approach (sends all 14 lines at once)
-- Tested and working on macOS (Phase 2)
-- Should work identically on Pi 1 with same hardware
+```bash
+mosquitto_pub -h 10.10.5.149 -t test -m "hello"
+```
 
-### High CPU usage on Pi 1
+## File Structure
 
-- Lower `BUTTON_POLL_RATE` to 30-40Hz
-- Increase `DISPLAY_THROTTLE` to 200ms
-- Check for MQTT message flood (ioBroker sending too fast)
+```
+mcdu-client/
+├── mcdu-client.js        # Main entry point
+├── lib/
+│   ├── mcdu.js           # USB HID driver (dual Mac/Linux backend)
+│   └── button-map.json   # Button ID → name mapping
+├── config.env            # Local config (gitignored on Pi, committed for Mac)
+├── config.env.template   # Config template
+└── mcdu-client.service   # systemd service file
+```
 
-### Memory leak (increasing RAM over time)
+## License
 
-- Check for orphaned button event listeners
-- Monitor with: `watch -n 1 'ps aux | grep node'`
-- Restart service if needed: `sudo systemctl restart mcdu-client`
-
-## Architecture Notes
-
-**Stateless Design:**
-- No business logic in client (all in ioBroker adapter)
-- No template rendering (ioBroker builds display pages)
-- No button handlers (ioBroker decides what buttons do)
-
-**Cached State:**
-- Display: 14 lines cached locally (avoid redundant HID writes)
-- LEDs: 11 states cached (only send changed LEDs)
-
-**Throttling:**
-- Display: Max 10 updates/sec (even if MQTT floods faster)
-- LEDs: Max 20 updates/sec
-- Buttons: Polled at 50Hz (100Hz on more powerful hardware)
-
-**Error Recovery:**
-- HID disconnect: Auto-reconnect every 5 seconds
-- MQTT disconnect: mqtt.js auto-reconnects with exponential backoff
-- Invalid JSON: Log and ignore (don't crash)
-
-## Next Steps (Phase 3b)
-
-After this client is tested and working:
-1. Build ioBroker adapter
-2. Implement template system
-3. Add state subscriptions
-4. JSON Config UI
-5. End-to-end integration testing
-
----
-
-**Contract:** See [PHASE3A-SPEC.md](../PHASE3A-SPEC.md) for complete MQTT specification.
-
-**License:** MIT  
-**Author:** Felix Hummel
+MIT — Felix Hummel
