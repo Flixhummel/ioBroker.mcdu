@@ -475,8 +475,17 @@ class McduAdapter extends utils.Adapter {
      * @param {ioBroker.State | null | undefined} state - State object
      */
     async onStateChange(id, state) {
-        if (!state || state.ack) return;
-        
+        if (!state) return;
+
+        // Handle data source changes regardless of ack (sensor data always has ack=true)
+        if (this.subscriptions.has(id)) {
+            this.log.debug(`Data source changed: ${id}, re-rendering page`);
+            await this.renderCurrentPage();
+        }
+
+        // Control states only handle non-ack changes
+        if (state.ack) return;
+
         try {
             // Handle control states
             if (id === `${this.namespace}.control.switchPage`) {
@@ -578,12 +587,6 @@ class McduAdapter extends utils.Adapter {
                 }
             }
             
-            // Handle data source changes
-            if (this.subscriptions.has(id)) {
-                // Re-render current page
-                this.log.debug(`Data source changed: ${id}, re-rendering page`);
-                await this.renderCurrentPage();
-            }
         } catch (error) {
             this.log.error(`Error handling state change ${id}: ${error.message}`);
         }
@@ -893,6 +896,10 @@ class McduAdapter extends utils.Adapter {
 
                 case 'browseStates':
                     this.handleBrowseStates(obj);
+                    break;
+
+                case 'getStateList':
+                    this.handleGetStateList(obj);
                     break;
 
                 case 'createSampleData':
@@ -1318,6 +1325,37 @@ class McduAdapter extends utils.Adapter {
         }
     }
     
+    /**
+     * Handle getStateList command from admin UI autocomplete
+     * Returns [{label, value}] filtered by typed text for autocompleteSendTo
+     * @param {object} obj - Message object with value (typed text)
+     */
+    async handleGetStateList(obj) {
+        try {
+            const filter = (obj.message?.value || '').toLowerCase();
+            const allObjects = await this.getForeignObjectsAsync('*', 'state');
+            const results = [];
+
+            for (const [id, stateObj] of Object.entries(allObjects)) {
+                if (id.startsWith(`${this.namespace}.`)) continue;
+                if (filter && !id.toLowerCase().includes(filter)) continue;
+
+                const unit = stateObj.common?.unit || '';
+                const type = stateObj.common?.type || '';
+                const label = unit ? `${id} (${type}, ${unit})` : `${id} (${type})`;
+                results.push({ label, value: id });
+
+                if (results.length >= 100) break;
+            }
+
+            results.sort((a, b) => a.value.localeCompare(b.value));
+            this.sendTo(obj.from, obj.command, results, obj.callback);
+        } catch (error) {
+            this.log.error(`Error in getStateList: ${error.message}`);
+            this.sendTo(obj.from, obj.command, [], obj.callback);
+        }
+    }
+
     /**
      * Handle createSampleData command — creates test states under 0_userdata.0.mcdu_test
      * @param {object} obj - Message object

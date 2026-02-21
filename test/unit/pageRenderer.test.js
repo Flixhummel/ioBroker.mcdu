@@ -423,8 +423,8 @@ describe('PageRenderer', () => {
         });
     });
 
-    describe('Navigation Indicators', () => {
-        it('should add < > indicators on lines with navigation buttons', async () => {
+    describe('Line Rendering', () => {
+        it('should render navigation lines without < > indicators', async () => {
             const pages = [
                 {
                     id: 'test-nav',
@@ -447,63 +447,10 @@ describe('PageRenderer', () => {
 
             await renderer.renderPage('test-nav');
             const display = displayPublisher._published[displayPublisher._published.length - 1];
-            // Row 3 = index 2
-            expect(display[2].text).to.match(/^</);
-            expect(display[2].text).to.match(/>$/);
-        });
-
-        it('should NOT add < > indicators on lines without navigation buttons', async () => {
-            const pages = [
-                {
-                    id: 'test-no-nav',
-                    name: 'Test No Nav',
-                    lines: [
-                        {
-                            row: 3,
-                            left: {
-                                label: '',
-                                display: { type: 'label', text: 'INFO TEXT' },
-                                button: { type: 'empty' }
-                            },
-                            right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
-                        }
-                    ]
-                }
-            ];
-            adapter.config.pages = pages;
-            adapter.breadcrumb = [{ id: 'test-no-nav', name: 'Test No Nav' }];
-
-            await renderer.renderPage('test-no-nav');
-            const display = displayPublisher._published[displayPublisher._published.length - 1];
-            // Row 3 = index 2
+            // Row 3 = index 2: plain text, no < > wrapping
             expect(display[2].text).to.not.match(/^</);
-        });
-
-        it('should NOT add < > indicators on datapoint buttons', async () => {
-            const pages = [
-                {
-                    id: 'test-dp',
-                    name: 'Test DP',
-                    lines: [
-                        {
-                            row: 3,
-                            left: {
-                                label: 'TEMP',
-                                display: { type: 'datapoint', source: 'test.temp' },
-                                button: { type: 'datapoint', target: 'test.temp' }
-                            },
-                            right: { label: '', display: { type: 'empty' }, button: { type: 'empty' } }
-                        }
-                    ]
-                }
-            ];
-            adapter.config.pages = pages;
-            adapter.breadcrumb = [{ id: 'test-dp', name: 'Test DP' }];
-
-            await renderer.renderPage('test-dp');
-            const display = displayPublisher._published[displayPublisher._published.length - 1];
-            // Row 3 = index 2
-            expect(display[2].text).to.not.match(/^</);
+            expect(display[2].text).to.not.match(/>$/);
+            expect(display[2].text.trim()).to.equal('LIGHTS');
         });
 
         it('should add scroll indicators when paginated', async () => {

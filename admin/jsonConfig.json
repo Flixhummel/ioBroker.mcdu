@@ -237,14 +237,14 @@
                   "type": "text",
                   "attr": "leftLabel",
                   "title": "L-Label",
-                  "width": "90px",
+                  "width": "130px",
                   "default": ""
                 },
                 {
                   "type": "text",
                   "attr": "leftText",
                   "title": "L-Data",
-                  "width": "120px",
+                  "width": "130px",
                   "default": "",
                   "hidden": "data.leftButtonType === 'datapoint'"
                 },
@@ -289,12 +289,13 @@
                   "hidden": "data.leftButtonType !== 'navigation'"
                 },
                 {
-                  "type": "text",
+                  "type": "autocompleteSendTo",
                   "attr": "leftSource",
                   "title": "L-Source",
-                  "width": "140px",
+                  "command": "getStateList",
+                  "freeSolo": true,
+                  "width": "200px",
                   "default": "",
-                  "placeholder": "0_userdata.0.mcdu_test.xxx",
                   "hidden": "data.leftButtonType !== 'datapoint'"
                 },
                 {
@@ -317,14 +318,14 @@
                   "type": "text",
                   "attr": "rightLabel",
                   "title": "R-Label",
-                  "width": "90px",
+                  "width": "130px",
                   "default": ""
                 },
                 {
                   "type": "text",
                   "attr": "rightText",
                   "title": "R-Data",
-                  "width": "120px",
+                  "width": "130px",
                   "default": "",
                   "hidden": "data.rightButtonType === 'datapoint'"
                 },
@@ -369,12 +370,13 @@
                   "hidden": "data.rightButtonType !== 'navigation'"
                 },
                 {
-                  "type": "text",
+                  "type": "autocompleteSendTo",
                   "attr": "rightSource",
                   "title": "R-Source",
-                  "width": "140px",
+                  "command": "getStateList",
+                  "freeSolo": true,
+                  "width": "200px",
                   "default": "",
-                  "placeholder": "0_userdata.0.mcdu_test.xxx",
                   "hidden": "data.rightButtonType !== 'datapoint'"
                 },
                 {
