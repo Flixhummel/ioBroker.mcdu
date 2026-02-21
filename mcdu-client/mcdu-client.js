@@ -479,16 +479,40 @@ function handleStatusPing(data) {
 // ============================================================================
 
 /**
- * Update display (throttled to 100ms)
+ * Update display (serialized — only one USB transfer at a time)
+ * mcdu.updateDisplay() sends 14 lines of USB packets with 40ms delays (~560ms total).
+ * Without serialization, overlapping calls interleave USB packets and corrupt the display.
  */
+let displayUpdateRunning = false;
+let displayUpdatePending = false;
+
 function updateDisplay() {
-  const now = Date.now();
-  if (now - displayCache.lastUpdate < CONFIG.performance.displayThrottle) {
+  if (displayUpdateRunning) {
+    // Another update is in progress — mark pending so it re-renders when done
+    displayUpdatePending = true;
     return;
   }
-  if (!CONFIG.mockMode && mcdu) mcdu.updateDisplay();
-  displayCache.lastUpdate = now;
-  stats.displaysRendered++;
+
+  displayUpdateRunning = true;
+  if (!CONFIG.mockMode && mcdu) {
+    mcdu.updateDisplay().then(() => {
+      displayCache.lastUpdate = Date.now();
+      stats.displaysRendered++;
+      displayUpdateRunning = false;
+
+      // If a new update was requested while we were rendering, do it now
+      if (displayUpdatePending) {
+        displayUpdatePending = false;
+        updateDisplay();
+      }
+    }).catch(err => {
+      log.error('Display update error:', err.message);
+      stats.errors++;
+      displayUpdateRunning = false;
+    });
+  } else {
+    displayUpdateRunning = false;
+  }
 }
 
 let lastLEDUpdate = 0;
