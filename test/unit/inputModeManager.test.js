@@ -237,8 +237,20 @@ describe('InputModeManager', () => {
 
             await inputManager.handleLSK('left', 3);
 
-            // Should fall through to handleDatapointLSK and write value
+            // Should use handleDatapointLSK (display takes priority) and write value
             expect(adapter._foreignStates['test.temperature'].val).to.equal(22);
+        });
+
+        it('should prefer datapoint display over stale datapoint button target', async () => {
+            // Admin UI leaves old button target when display source is changed
+            adapter.config.pages[0].lines[0].left.button = { type: 'datapoint', target: 'old.stale.state' };
+            // display correctly points to temperature
+            scratchpad.set('25');
+
+            await inputManager.handleLSK('left', 3);
+
+            // Should use metadata-driven path (display), not the stale button target
+            expect(adapter._foreignStates['test.temperature'].val).to.equal(25);
         });
 
         it('should treat navigation button with empty target as non-actionable', () => {
