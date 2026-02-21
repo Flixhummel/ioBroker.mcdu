@@ -64,7 +64,7 @@
               "disabled": "true",
               "help": "Fixed by hardware",
               "sm": 12,
-              "md": 4
+              "md": 6
             },
             "display.rows": {
               "type": "number",
@@ -73,24 +73,7 @@
               "disabled": "true",
               "help": "Fixed by hardware",
               "sm": 12,
-              "md": 4
-            },
-            "display.defaultColor": {
-              "type": "select",
-              "label": "Default Color",
-              "options": [
-                {"label": "White", "value": "white"},
-                {"label": "Green", "value": "green"},
-                {"label": "Blue", "value": "blue"},
-                {"label": "Amber", "value": "amber"},
-                {"label": "Red", "value": "red"},
-                {"label": "Magenta", "value": "magenta"},
-                {"label": "Cyan", "value": "cyan"},
-                {"label": "Yellow", "value": "yellow"}
-              ],
-              "default": "white",
-              "sm": 12,
-              "md": 4
+              "md": 6
             }
           }
         },
@@ -178,6 +161,35 @@
             }
           }
         },
+        "_dividerDisplay": {
+          "type": "divider",
+          "text": "Display",
+          "hidden": "!data.selectedDevice"
+        },
+        "displayDeviceSettings": {
+          "type": "panel",
+          "hidden": "!data.selectedDevice",
+          "items": {
+            "display.defaultColor": {
+              "type": "select",
+              "label": "Default Text Color",
+              "options": [
+                {"label": "White", "value": "white"},
+                {"label": "Green", "value": "green"},
+                {"label": "Blue", "value": "blue"},
+                {"label": "Amber", "value": "amber"},
+                {"label": "Red", "value": "red"},
+                {"label": "Magenta", "value": "magenta"},
+                {"label": "Cyan", "value": "cyan"},
+                {"label": "Yellow", "value": "yellow"}
+              ],
+              "default": "white",
+              "sm": 12,
+              "md": 4,
+              "help": "Default color for data text when no per-line ColData is set"
+            }
+          }
+        },
         "_dividerPages": {
           "type": "divider",
           "text": "Pages",
@@ -234,19 +246,23 @@
                   "default": 1
                 },
                 {
-                  "type": "text",
-                  "attr": "leftLabel",
-                  "title": "L-Label",
-                  "width": "160px",
-                  "default": ""
+                  "type": "select",
+                  "attr": "leftButtonType",
+                  "title": "L-Type",
+                  "width": "90px",
+                  "default": "empty",
+                  "options": [
+                    {"label": "-", "value": "empty"},
+                    {"label": "Navigate", "value": "navigation"},
+                    {"label": "Datapoint", "value": "datapoint"}
+                  ]
                 },
                 {
                   "type": "text",
-                  "attr": "leftText",
-                  "title": "L-Data",
-                  "width": "160px",
-                  "default": "",
-                  "hidden": "data.leftButtonType === 'datapoint'"
+                  "attr": "leftLabel",
+                  "title": "L-Label",
+                  "width": "130px",
+                  "default": ""
                 },
                 {
                   "type": "select",
@@ -267,6 +283,14 @@
                   ]
                 },
                 {
+                  "type": "text",
+                  "attr": "leftText",
+                  "title": "L-Data",
+                  "width": "130px",
+                  "default": "",
+                  "hidden": "data.leftButtonType === 'datapoint'"
+                },
+                {
                   "type": "select",
                   "attr": "leftColData",
                   "title": "L-ColData",
@@ -282,18 +306,6 @@
                     {"label": "Magenta", "value": "magenta"},
                     {"label": "Cyan", "value": "cyan"},
                     {"label": "Yellow", "value": "yellow"}
-                  ]
-                },
-                {
-                  "type": "select",
-                  "attr": "leftButtonType",
-                  "title": "L-Btn",
-                  "width": "90px",
-                  "default": "empty",
-                  "options": [
-                    {"label": "-", "value": "empty"},
-                    {"label": "Navigate", "value": "navigation"},
-                    {"label": "Datapoint", "value": "datapoint"}
                   ]
                 },
                 {
@@ -332,19 +344,23 @@
                   "hidden": "data.leftButtonType !== 'datapoint'"
                 },
                 {
-                  "type": "text",
-                  "attr": "rightLabel",
-                  "title": "R-Label",
-                  "width": "160px",
-                  "default": ""
+                  "type": "select",
+                  "attr": "rightButtonType",
+                  "title": "R-Type",
+                  "width": "90px",
+                  "default": "empty",
+                  "options": [
+                    {"label": "-", "value": "empty"},
+                    {"label": "Navigate", "value": "navigation"},
+                    {"label": "Datapoint", "value": "datapoint"}
+                  ]
                 },
                 {
                   "type": "text",
-                  "attr": "rightText",
-                  "title": "R-Data",
-                  "width": "160px",
-                  "default": "",
-                  "hidden": "data.rightButtonType === 'datapoint'"
+                  "attr": "rightLabel",
+                  "title": "R-Label",
+                  "width": "130px",
+                  "default": ""
                 },
                 {
                   "type": "select",
@@ -365,6 +381,14 @@
                   ]
                 },
                 {
+                  "type": "text",
+                  "attr": "rightText",
+                  "title": "R-Data",
+                  "width": "130px",
+                  "default": "",
+                  "hidden": "data.rightButtonType === 'datapoint'"
+                },
+                {
                   "type": "select",
                   "attr": "rightColData",
                   "title": "R-ColData",
@@ -380,18 +404,6 @@
                     {"label": "Magenta", "value": "magenta"},
                     {"label": "Cyan", "value": "cyan"},
                     {"label": "Yellow", "value": "yellow"}
-                  ]
-                },
-                {
-                  "type": "select",
-                  "attr": "rightButtonType",
-                  "title": "R-Btn",
-                  "width": "90px",
-                  "default": "empty",
-                  "options": [
-                    {"label": "-", "value": "empty"},
-                    {"label": "Navigate", "value": "navigation"},
-                    {"label": "Datapoint", "value": "datapoint"}
                   ]
                 },
                 {

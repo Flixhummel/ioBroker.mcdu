@@ -14,7 +14,7 @@
           "row": 5,
           "left": {
             "label": "",
-            "display": { "type": "label", "text": "CLIMATE CONTROL", "color": "green" },
+            "display": { "type": "label", "text": "CLIMATE CONTROL", "colData": "green" },
             "button": { "type": "empty" }
           },
           "right": {
@@ -27,7 +27,7 @@
           "row": 7,
           "left": {
             "label": "WOHNZIMMER",
-            "display": { "type": "datapoint", "text": "Living", "source": "", "format": "%.1f", "unit": "C", "color": "white" },
+            "display": { "type": "datapoint", "text": "Living", "source": "", "format": "%.1f", "unit": "C", "colData": "white" },
             "button": { "type": "navigation", "action": "goto", "target": "climate-living" }
           },
           "right": {
@@ -40,7 +40,7 @@
           "row": 9,
           "left": {
             "label": "SCHLAFZIMMER",
-            "display": { "type": "datapoint", "text": "Bedroom", "source": "", "format": "%.1f", "unit": "C", "color": "white" },
+            "display": { "type": "datapoint", "text": "Bedroom", "source": "", "format": "%.1f", "unit": "C", "colData": "white" },
             "button": { "type": "navigation", "action": "goto", "target": "climate-bedroom" }
           },
           "right": {
@@ -53,7 +53,7 @@
           "row": 11,
           "left": {
             "label": "KUECHE",
-            "display": { "type": "datapoint", "text": "Kitchen", "source": "", "format": "%.1f", "unit": "C", "color": "white" },
+            "display": { "type": "datapoint", "text": "Kitchen", "source": "", "format": "%.1f", "unit": "C", "colData": "white" },
             "button": { "type": "navigation", "action": "goto", "target": "climate-kitchen" }
           },
           "right": {
@@ -66,7 +66,7 @@
           "row": 13,
           "left": {
             "label": "BADEZIMMER",
-            "display": { "type": "datapoint", "text": "Bathroom", "source": "", "format": "%.1f", "unit": "C", "color": "white" },
+            "display": { "type": "datapoint", "text": "Bathroom", "source": "", "format": "%.1f", "unit": "C", "colData": "white" },
             "button": { "type": "navigation", "action": "goto", "target": "climate-bathroom" }
           },
           "right": {
@@ -86,7 +86,7 @@
           "row": 5,
           "left": {
             "label": "",
-            "display": { "type": "label", "text": "LIVING ROOM", "color": "green" },
+            "display": { "type": "label", "text": "LIVING ROOM", "colData": "green" },
             "button": { "type": "empty" }
           },
           "right": {
@@ -99,7 +99,7 @@
           "row": 7,
           "left": {
             "label": "IST",
-            "display": { "type": "datapoint", "text": "Current", "source": "", "format": "%.1f", "unit": "C", "color": "white" },
+            "display": { "type": "datapoint", "text": "Current", "source": "", "format": "%.1f", "unit": "C", "colData": "white" },
             "button": { "type": "empty" }
           },
           "right": {
@@ -112,7 +112,7 @@
           "row": 9,
           "left": {
             "label": "SOLL",
-            "display": { "type": "datapoint", "text": "Setpoint", "source": "", "format": "%.1f", "unit": "C", "color": "amber", "editable": true, "inputType": "numeric", "validation": { "min": 15.0, "max": 28.0, "step": 0.5 } },
+            "display": { "type": "datapoint", "text": "Setpoint", "source": "", "format": "%.1f", "unit": "C", "colData": "amber", "editable": true, "inputType": "numeric", "validation": { "min": 15.0, "max": 28.0, "step": 0.5 } },
             "button": { "type": "empty" }
           },
           "right": {
@@ -125,7 +125,7 @@
           "row": 11,
           "left": {
             "label": "FEUCHTE",
-            "display": { "type": "datapoint", "text": "Humidity", "source": "", "format": "%d%%", "unit": "%", "color": "cyan" },
+            "display": { "type": "datapoint", "text": "Humidity", "source": "", "format": "%d%%", "unit": "%", "colData": "cyan" },
             "button": { "type": "empty" }
           },
           "right": {
@@ -138,7 +138,7 @@
           "row": 13,
           "left": {
             "label": "MODUS",
-            "display": { "type": "datapoint", "text": "Heating Mode", "source": "", "format": "%s", "color": "white" },
+            "display": { "type": "datapoint", "text": "Heating Mode", "source": "", "format": "%s", "colData": "white" },
             "button": { "type": "datapoint", "action": "toggle", "target": "" }
           },
           "right": {
@@ -158,7 +158,7 @@
           "row": 5,
           "left": {
             "label": "",
-            "display": { "type": "label", "text": "BEDROOM", "color": "green" },
+            "display": { "type": "label", "text": "BEDROOM", "colData": "green" },
             "button": { "type": "empty" }
           },
           "right": {
@@ -171,7 +171,7 @@
           "row": 7,
           "left": {
             "label": "IST",
-            "display": { "type": "datapoint", "text": "Current", "source": "", "format": "%.1f", "unit": "C", "color": "white" },
+            "display": { "type": "datapoint", "text": "Current", "source": "", "format": "%.1f", "unit": "C", "colData": "white" },
             "button": { "type": "empty" }
           },
           "right": {
@@ -184,7 +184,7 @@
           "row": 9,
           "left": {
             "label": "SOLL",
-            "display": { "type": "datapoint", "text": "Setpoint", "source": "", "format": "%.1f", "unit": "C", "color": "amber", "editable": true, "inputType": "numeric", "validation": { "min": 15.0, "max": 28.0, "step": 0.5 } },
+            "display": { "type": "datapoint", "text": "Setpoint", "source": "", "format": "%.1f", "unit": "C", "colData": "amber", "editable": true, "inputType": "numeric", "validation": { "min": 15.0, "max": 28.0, "step": 0.5 } },
             "button": { "type": "empty" }
           },
           "right": {
@@ -204,7 +204,7 @@
           "row": 5,
           "left": {
             "label": "",
-            "display": { "type": "label", "text": "KITCHEN", "color": "green" },
+            "display": { "type": "label", "text": "KITCHEN", "colData": "green" },
             "button": { "type": "empty" }
           },
           "right": {
@@ -217,7 +217,7 @@
           "row": 7,
           "left": {
             "label": "IST",
-            "display": { "type": "datapoint", "text": "Current", "source": "", "format": "%.1f", "unit": "C", "color": "white" },
+            "display": { "type": "datapoint", "text": "Current", "source": "", "format": "%.1f", "unit": "C", "colData": "white" },
             "button": { "type": "empty" }
           },
           "right": {
@@ -237,7 +237,7 @@
           "row": 5,
           "left": {
             "label": "",
-            "display": { "type": "label", "text": "BATHROOM", "color": "green" },
+            "display": { "type": "label", "text": "BATHROOM", "colData": "green" },
             "button": { "type": "empty" }
           },
           "right": {
@@ -250,7 +250,7 @@
           "row": 7,
           "left": {
             "label": "IST",
-            "display": { "type": "datapoint", "text": "Current", "source": "", "format": "%.1f", "unit": "C", "color": "white" },
+            "display": { "type": "datapoint", "text": "Current", "source": "", "format": "%.1f", "unit": "C", "colData": "white" },
             "button": { "type": "empty" }
           },
           "right": {
