@@ -1011,7 +1011,6 @@ class McduAdapter extends utils.Adapter {
      * @returns {Promise<Array>} Pages with resolved defaults
      */
     async resolveDatapointDefaults(pages) {
-        this.log.info(`resolveDatapointDefaults: processing ${pages.length} pages`);
         for (const page of pages) {
             const lines = page.lines || [];
             for (const line of lines) {
@@ -1020,15 +1019,10 @@ class McduAdapter extends utils.Adapter {
                     if (side.display.type !== 'datapoint' || !side.display.source) continue;
                     if (side.display.format && side.display.unit) continue; // both already set
 
-                    this.log.info(`resolveDatapointDefaults: looking up ${side.display.source} (fmt="${side.display.format}", unit="${side.display.unit}")`);
                     try {
                         const obj = await this.getForeignObjectAsync(side.display.source);
-                        if (!obj || !obj.common) {
-                            this.log.warn(`resolveDatapointDefaults: no object found for ${side.display.source}`);
-                            continue;
-                        }
+                        if (!obj || !obj.common) continue;
 
-                        this.log.info(`resolveDatapointDefaults: found obj type=${obj.common.type}, unit=${obj.common.unit}`);
                         if (!side.display.unit && obj.common.unit) {
                             side.display.unit = obj.common.unit;
                         }
@@ -1040,9 +1034,9 @@ class McduAdapter extends utils.Adapter {
                                 side.display.format = '%s';
                             }
                         }
-                        this.log.info(`resolveDatapointDefaults: resolved fmt="${side.display.format}", unit="${side.display.unit}"`);
+                        this.log.debug(`resolveDatapointDefaults: ${side.display.source} → fmt="${side.display.format}", unit="${side.display.unit}"`);
                     } catch (e) {
-                        this.log.error(`resolveDatapointDefaults: error looking up ${side.display.source}: ${e.message}`);
+                        this.log.debug(`resolveDatapointDefaults: Could not look up ${side.display.source}: ${e.message}`);
                     }
                 }
             }
@@ -1148,6 +1142,9 @@ class McduAdapter extends utils.Adapter {
 
             // Convert flat lines (from Admin UI) back to nested format for storage
             const nestedPages = unflattenPages(pages);
+
+            // Auto-resolve format/unit from ioBroker object metadata before storing
+            await this.resolveDatapointDefaults(nestedPages);
 
             const stateId = `devices.${deviceId}.config.pages`;
             await this.setStateAsync(stateId, JSON.stringify(nestedPages), true);
