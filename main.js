@@ -222,6 +222,7 @@ class McduAdapter extends utils.Adapter {
             this.subscribeStates('devices.*.control.*');
             this.subscribeStates('devices.*.config.*');
             this.subscribeStates('devices.*.display.brightness');
+            this.subscribeStates('devices.*.display.brightnessStep');
             
             // Live data re-render timer (status bar time + datapoint refresh)
             // Skips re-render during active input to avoid display flicker
@@ -620,6 +621,27 @@ class McduAdapter extends utils.Adapter {
             else if (deviceId && deviceStatePath === 'display.brightness') {
                 await this.handleLEDChange(deviceId, 'SCREEN_BACKLIGHT', state.val);
                 await this.setStateAsync(id.replace(`${this.namespace}.`, ''), state.val, true);
+            }
+
+            // Per-device display brightnessStep
+            else if (deviceId && deviceStatePath === 'display.brightnessStep') {
+                const step = Math.max(1, Math.min(255, parseInt(state.val, 10) || 20));
+                this.config.display.brightnessStep = step;
+                await this.setStateAsync(id.replace(`${this.namespace}.`, ''), step, true);
+                this.log.info(`BRT/DIM step for ${deviceId} set to ${step}`);
+            }
+
+            // Per-device config.defaultColor
+            else if (deviceId && deviceStatePath === 'config.defaultColor') {
+                const validColors = ['white', 'green', 'blue', 'amber', 'red', 'magenta', 'cyan', 'yellow'];
+                const color = validColors.includes(state.val) ? state.val : 'white';
+                this.config.display.defaultColor = color;
+                if (this.pageRenderer) {
+                    this.pageRenderer.defaultColor = color;
+                }
+                await this.setStateAsync(id.replace(`${this.namespace}.`, ''), color, true);
+                await this.renderCurrentPage();
+                this.log.info(`Default color for ${deviceId} set to ${color}`);
             }
 
             // Phase 4.1: Scratchpad changes
