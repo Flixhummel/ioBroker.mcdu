@@ -13,8 +13,8 @@
             "mqtt.broker": {
               "type": "text",
               "label": "Broker Address",
-              "placeholder": "10.10.5.149",
-              "default": "10.10.5.149",
+              "placeholder": "localhost",
+              "default": "localhost",
               "sm": 12,
               "md": 6
             },

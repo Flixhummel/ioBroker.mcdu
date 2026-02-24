@@ -41,7 +41,7 @@ This document specifies the architecture for a production-ready ioBroker adapter
 └──────────────────────────────────────┼──────────────────────┘
                                        │
                                        │ MQTT Broker
-                                       │ (10.10.5.149:1883)
+                                       │ (YOUR_BROKER_IP:1883)
                                        │
                          ┌─────────────┴─────────────┐
                          │                           │
@@ -78,7 +78,7 @@ Stored in `io-package.json` under `native`:
   "native": {
     // Global Settings
     "mqtt": {
-      "broker": "10.10.5.149",
+      "broker": "YOUR_BROKER_IP",
       "port": 1883,
       "username": "iobroker",
       "topicPrefix": "mcdu"
@@ -304,7 +304,7 @@ mcdu.0
             "mqtt.broker": {
               "type": "text",
               "label": "Broker Address",
-              "default": "10.10.5.149"
+              "default": "YOUR_BROKER_IP"
             },
             "mqtt.port": {
               "type": "number",

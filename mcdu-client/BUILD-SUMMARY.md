@@ -231,7 +231,7 @@ A complete **Node.js MQTT client** for Raspberry Pi that:
 
 ```bash
 # Navigate to mcdu-client directory
-cd /Users/kiraholt/.openclaw/workspace/coding-projects/mcdu-smarthome/mcdu-client
+cd mcdu-client
 
 # Create deployment package
 tar -czf mcdu-client.tar.gz --exclude node_modules --exclude config.json .

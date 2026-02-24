@@ -45,11 +45,17 @@ The ioBroker adapter runs all business logic (page rendering, input handling, va
 | Input System (scratchpad, validation, confirmation) | Done |
 | Business Logic (rendering, pagination, function keys) | Done |
 | Admin UI Redesign + Left/Right Line Model | Done |
-| UX Phases A-C (function keys, navigation, layout types) | Done |
+| UX Phase A: Function Key Configuration | Done |
+| UX Phase B: Navigation Hierarchy & Breadcrumbs | Done |
+| UX Phase C: Page Layout Types (menu/data/list) | Done |
 | Display Enhancement (color split, brightness, device states) | Done |
+| UX Phase D: Quick Access Page | Not started |
+| UX Phase E: LED Assignment Configuration | Not started |
+| UX Phase F: Configuration Profiles | Not started |
+| UX Phase G: Admin UI Polish & Integration | Not started |
 | Hardware Deployment Testing | Not started |
 
-191 tests passing (180 unit + 11 integration).
+199 tests passing (188 unit + 11 integration).
 
 ### Recommended Hardware (mcdu-client)
 
@@ -69,14 +75,12 @@ The mcdu-client is a lightweight Node.js process (~50-100MB RAM) that bridges MQ
 
 ```bash
 npm install
-npm test          # Run all 191 tests
+npm test          # Run all tests
 npm run lint      # ESLint
 npm run check     # Lint + test combined
 ```
 
 For detailed documentation, see [docs/](docs/README.md).
-
-For the implementation plan, see [docs/implementation/IMPLEMENTATION-PLAN.md](docs/implementation/IMPLEMENTATION-PLAN.md).
 
 ### Scripts
 

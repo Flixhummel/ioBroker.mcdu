@@ -1,68 +1,40 @@
 # MCDU Smart Home Controller - Documentation
 
-Complete project documentation for the MCDU (Multipurpose Control and Display Unit) smart home adapter.
-
-**Current Status (2026-02-19):** Adapter Phase 3 (Business Logic) complete. 109 tests passing. Phases 4 (Admin UI) and 5 (Hardware Deployment) remain.
+Complete project documentation for the ioBroker MCDU adapter (v0.1.0 pre-release).
 
 ## Documentation Structure
 
+### Root Documentation
+- **[PAGE-CONFIGURATION-GUIDE.md](./PAGE-CONFIGURATION-GUIDE.md)** - Page configuration reference (start here for page setup)
+- **[AUTOMATION-QUICKSTART.md](./AUTOMATION-QUICKSTART.md)** - Home automation scripting with 32 automation states
+- **[MQTT-TEST-COMMANDS.md](./MQTT-TEST-COMMANDS.md)** - MQTT testing commands for manual debugging
+- **[MULTI-COLOR-FEATURE.md](./MULTI-COLOR-FEATURE.md)** - Multi-color display segments (per-character colors)
+- **[GETTING-STARTED.md](./GETTING-STARTED.md)** - Original scaffolding notes (historical)
+
 ### `/architecture/`
 Architecture decisions and system design:
-- **ARCHITECTURE.md** - Overall system architecture
-- **ARCHITECTURE-DECISION.md** - Why ioBroker adapter approach
-- **ARCHITECTURE-REVISION.md** - Multi-device architecture redesign
-- **IOBROKER-ADAPTER-ARCHITECTURE.md** - Detailed adapter architecture
-
-### `/implementation/`
-Implementation plans and technical designs:
-- **IMPLEMENTATION-PLAN.md** - Step-by-step implementation guide (Phases 1-5)
-- **JSONCONFIG-PLAN.md** - Admin UI configuration design
-- **TEMPLATES-DESIGN.md** - Page template system
-- **ADAPTER-PLAN.md** - Original adapter planning
+- **[ARCHITECTURE.md](./architecture/ARCHITECTURE.md)** - Overall system architecture
+- **[ARCHITECTURE-DECISION.md](./architecture/ARCHITECTURE-DECISION.md)** - Why ioBroker adapter approach
+- **[ARCHITECTURE-REVISION.md](./architecture/ARCHITECTURE-REVISION.md)** - Multi-device architecture redesign
+- **[IOBROKER-ADAPTER-ARCHITECTURE.md](./architecture/IOBROKER-ADAPTER-ARCHITECTURE.md)** - Detailed adapter architecture
 
 ### `/research/`
 Research, requirements, and analysis:
-- **RESEARCH.md** - Initial research findings
-- **REFERENCES.md** - API references and external docs
-- **ADAPTER-CREATOR-COMPARISON.md** - Tool comparison
-- **requirements.md** - Project requirements
-
-### `/phases/`
-Phase-by-phase delivery reports:
-- **PROGRESS.md** - Overall progress tracking (start here for status)
-- **STATUS-SUMMARY.md** - Current status with architecture diagram and module overview
-- **PHASE1-DELIVERY-REPORT.md** - Hardware + MQTT client
-- **PHASE2-DELIVERY-REPORT.md** - Button mapping + protocols
-- **PHASE2-SUMMARY.md** - Phase 2 summary
-- **PHASE3A-SPEC.md** - MQTT protocol specification
-- **PHASE3A-COMPLETE.md** - Phase 3A completion
-- **PHASE3A-COMPLETED.md** - Phase 3A final status
-- **PHASE3A-LESSONS-LEARNED.md** - Bugs and learnings from 3A
-- **PHASE4-DELIVERY-REPORT.md** - Admin UI and automation states
-- **PHASE-4.1-IMPLEMENTATION-SUMMARY.md** - Extended automation (32 new states)
-- **DEPLOYMENT-COMPLETE.md** - Deployment status
-- **READY-FOR-PUBLISHING.md** - Publishing checklist
+- **[RESEARCH.md](./research/RESEARCH.md)** - Initial research findings
+- **[REFERENCES.md](./research/REFERENCES.md)** - API references and external docs
+- **[ADAPTER-CREATOR-COMPARISON.md](./research/ADAPTER-CREATOR-COMPARISON.md)** - Tool comparison
+- **[requirements.md](./research/requirements.md)** - Project requirements
 
 ### `/ux-concept/`
 UX design and user experience documentation:
-- **UX-CONCEPT.md** - Authentic MCDU cockpit UX patterns
+- **[UX-CONCEPT.md](./ux-concept/UX-CONCEPT.md)** - Authentic MCDU cockpit UX patterns
 - Scratchpad system, input modes, LSK behavior
 - Visual feedback, validation, state machines
 
-### Root Documentation
-- **GETTING-STARTED.md** - Quick start guide
-- **AUTOMATION-QUICKSTART.md** - Home automation setup
-- **INTEGRATION-SUMMARY.md** - Integration overview
-- **MQTT-TEST-COMMANDS.md** - MQTT testing commands
-- **MULTI-COLOR-FEATURE.md** - Multi-color display feature
-- **PAGE-CONFIGURATION-GUIDE.md** - Page configuration reference
-
 ## Quick Links
 
-- **Current Status:** [phases/PROGRESS.md](./phases/PROGRESS.md)
-- **Start Here:** [GETTING-STARTED.md](./GETTING-STARTED.md)
+- **Page Setup:** [PAGE-CONFIGURATION-GUIDE.md](./PAGE-CONFIGURATION-GUIDE.md)
 - **Architecture Overview:** [architecture/ARCHITECTURE-REVISION.md](./architecture/ARCHITECTURE-REVISION.md)
-- **Implementation Plan:** [implementation/IMPLEMENTATION-PLAN.md](./implementation/IMPLEMENTATION-PLAN.md)
 - **UX Design:** [ux-concept/UX-CONCEPT.md](./ux-concept/UX-CONCEPT.md)
 
 ## Technical Documentation
@@ -71,6 +43,5 @@ Main repository README: [../README.md](../README.md)
 
 For adapter code documentation, see:
 - `/lib/` - Core library modules (mqtt, rendering, input, state, templates)
-- `/mcdu-client/` - Raspberry Pi client
-- `/admin/` - Admin UI configuration
-- `/test/unit/` - Unit tests (109 tests)
+- `/mcdu-client/` - Raspberry Pi client ([README](../mcdu-client/README.md), [Pi Setup](../mcdu-client/PI-SETUP.md))
+- `/admin/` - Admin UI configuration (jsonConfig)

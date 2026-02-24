@@ -75,7 +75,7 @@ The client auto-detects which mode you're using:
 ### 1. Climate Control
 ```bash
 # Living room: comfortable (green)
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":1,
   "segments":[
     {"text":"Living Room: ","color":"white"},
@@ -84,7 +84,7 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/l
 }'
 
 # Bedroom: too hot (red)
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":2,
   "segments":[
     {"text":"Bedroom: ","color":"white"},
@@ -93,7 +93,7 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/l
 }'
 
 # Kitchen: too cold (cyan)
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":3,
   "segments":[
     {"text":"Kitchen: ","color":"white"},
@@ -105,7 +105,7 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/l
 ### 2. Status Indicators
 ```bash
 # Door open warning
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":1,
   "segments":[
     {"text":"Front Door: ","color":"white"},
@@ -114,7 +114,7 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/l
 }'
 
 # Security armed
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":2,
   "segments":[
     {"text":"Security: ","color":"white"},
@@ -123,7 +123,7 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/l
 }'
 
 # Lights on
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":3,
   "segments":[
     {"text":"Lights: ","color":"white"},
@@ -135,7 +135,7 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/l
 ### 3. Energy Monitoring
 ```bash
 # Normal consumption (green)
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":1,
   "segments":[
     {"text":"Power: ","color":"white"},
@@ -144,7 +144,7 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/l
 }'
 
 # High consumption warning (red)
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":2,
   "segments":[
     {"text":"Power: ","color":"white"},
@@ -156,7 +156,7 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/l
 ### 4. Aviation Style (Like Real MCDU)
 ```bash
 # Runway display
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":1,
   "segments":[
     {"text":"Take off Rwy ","color":"white"},
@@ -165,7 +165,7 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/l
 }'
 
 # Flight level
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":2,
   "segments":[
     {"text":"FL","color":"white"},
@@ -180,29 +180,29 @@ mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/l
 
 ```bash
 # Line 1: Header
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":1,"text":"SMART HOME STATUS    ","color":"white"}'
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":1,"text":"SMART HOME STATUS    ","color":"white"}'
 
 # Line 2: Empty
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/clear -m '{}'
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/clear -m '{}'
 
 # Line 3: Climate (living room comfortable)
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":3,"segments":[{"text":"Living Room: ","color":"white"},{"text":"22°C","color":"green"}]}'
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":3,"segments":[{"text":"Living Room: ","color":"white"},{"text":"22°C","color":"green"}]}'
 
 # Line 4: Climate (bedroom hot)
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":4,"segments":[{"text":"Bedroom: ","color":"white"},{"text":"32°C","color":"red"}]}'
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":4,"segments":[{"text":"Bedroom: ","color":"white"},{"text":"32°C","color":"red"}]}'
 
 # Line 5: Empty
 
 # Line 6: Security armed
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":6,"segments":[{"text":"Security: ","color":"white"},{"text":"ARMED","color":"amber"}]}'
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":6,"segments":[{"text":"Security: ","color":"white"},{"text":"ARMED","color":"amber"}]}'
 
 # Line 7: Door status
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":7,"segments":[{"text":"Front Door: ","color":"white"},{"text":"LOCKED","color":"green"}]}'
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":7,"segments":[{"text":"Front Door: ","color":"white"},{"text":"LOCKED","color":"green"}]}'
 
 # Line 8: Empty
 
 # Line 9: Power consumption
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":9,"segments":[{"text":"Power: ","color":"white"},{"text":"2.3kW","color":"green"}]}'
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{"lineNumber":9,"segments":[{"text":"Power: ","color":"white"},{"text":"2.3kW","color":"green"}]}'
 ```
 
 ---
@@ -271,26 +271,12 @@ Each line is 24 characters total. Segments are concatenated and then:
 
 ## Deployment to Pi
 
-**Update the files on your Raspberry Pi:**
+See the [mcdu-client README](../mcdu-client/README.md) and [PI-SETUP.md](../mcdu-client/PI-SETUP.md) for Raspberry Pi deployment instructions.
+
+**Test multi-color from your Mac:**
 
 ```bash
-cd /tmp
-rm -rf kira-temp
-git clone --depth 1 https://github.com/Flixhummel/kira.git kira-temp
-cp kira-temp/workspace/coding-projects/mcdu-smarthome/mcdu-client/lib/mcdu.js /home/pi/mcdu-client/lib/
-cp kira-temp/workspace/coding-projects/mcdu-smarthome/mcdu-client/mcdu-client.js /home/pi/mcdu-client/
-rm -rf kira-temp
-
-cd /home/pi/mcdu-client
-sudo systemctl restart mcdu-client
-sudo systemctl status mcdu-client
-```
-
-**Test it:**
-
-```bash
-# From your Mac
-mosquitto_pub -h 10.10.5.149 -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_BROKER_IP -p 1883 -u iobroker -P [password] -t mcdu/display/line -m '{
   "lineNumber":1,
   "segments":[
     {"text":"Living Room: ","color":"white"},
@@ -326,7 +312,7 @@ This feature enables much richer smart home displays:
 - Security status at a glance
 - Aviation-style navigation displays
 
-**Ready for Phase 3b (ioBroker adapter)** which can now use this for template-based pages!
+The ioBroker adapter uses this feature for template-based pages with per-line color control via `colLabel` and `colData` fields.
 
 ---
 

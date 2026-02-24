@@ -45,7 +45,7 @@ sudo journalctl -u mcdu-client -f
 Edit `config.env`:
 
 ```bash
-MQTT_BROKER=mqtt://10.10.5.149:1883   # MQTT broker address
+MQTT_BROKER=mqtt://YOUR_BROKER_IP:1883   # MQTT broker address
 MQTT_TOPIC_PREFIX=mcdu                 # Topic prefix (default: mcdu)
 MQTT_CLIENT_ID=mcdu-client-mac         # Client ID (auto-derived from hostname if blank)
 ```
@@ -142,7 +142,7 @@ lsusb | grep 4098
 ### MQTT connection refused
 
 ```bash
-mosquitto_pub -h 10.10.5.149 -t test -m "hello"
+mosquitto_pub -h YOUR_BROKER_IP -t test -m "hello"
 ```
 
 ## File Structure

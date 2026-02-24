@@ -11,8 +11,23 @@ nbproject
 iobroker.*.tgz
 
 Thumbs.db
+.DS_Store
 .commitinfo
 
 # i18n intermediate files
 admin/i18n/flat.txt
 admin/i18n/*/flat.txt
+
+# Development-only files
+CLAUDE.md
+memory/
+PRPs/
+dev-docs/
+test/
+main.test.js
+
+# Environment files with credentials
+.env
+*.env
+!*.env.example
+!*.env.template

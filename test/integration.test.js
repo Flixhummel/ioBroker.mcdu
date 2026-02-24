@@ -57,7 +57,7 @@ describe('MCDU Integration Tests', function() {
             
             const testConfig = {
                 mqtt: {
-                    broker: '10.10.5.149',
+                    broker: 'localhost',
                     port: 1883,
                     topicPrefix: 'mcdu'
                 },

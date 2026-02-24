@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "mcdu",
-    "version": "1.1.0",
+    "version": "0.1.0",
     "news": {
-      "1.1.0": {
+      "0.1.0": {
         "en": "Phase 4.1: Added 32 automation states for external control (LEDs, notifications, navigation, buttons, runtime monitoring)",
         "de": "Phase 4.1: 32 Automatisierungs-States hinzugefügt für externe Steuerung (LEDs, Benachrichtigungen, Navigation, Tasten, Laufzeit-Überwachung)"
       },
@@ -65,7 +65,7 @@
   },
   "native": {
     "mqtt": {
-      "broker": "10.10.5.149",
+      "broker": "localhost",
       "port": 1883,
       "username": "iobroker",
       "password": "",

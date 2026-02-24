@@ -263,28 +263,20 @@ on({ id: 'mcdu.0.runtime.lastButtonPress', change: 'ne' }, function(obj) {
 
 ---
 
-## 🧪 Testing
+## Testing
 
-Run the included test suite:
+Run the adapter test suite:
 ```bash
 cd /path/to/iobroker.mcdu
-node test-automation-states.js
-```
-
-Expected output:
-```
-✅ Passed: 28
-❌ Failed: 0
-🎉 All tests passed!
+npm test
 ```
 
 ---
 
-## 📚 Further Reading
+## Further Reading
 
-- [PHASE-4.1-IMPLEMENTATION-SUMMARY.md](PHASE-4.1-IMPLEMENTATION-SUMMARY.md) - Full technical documentation
-- [USER-MANUAL.md](USER-MANUAL.md) - Complete user manual (to be updated)
-- [API-REFERENCE.md](API-REFERENCE.md) - Full API documentation (to be created)
+- [PAGE-CONFIGURATION-GUIDE.md](PAGE-CONFIGURATION-GUIDE.md) - Page configuration reference
+- [MQTT-TEST-COMMANDS.md](MQTT-TEST-COMMANDS.md) - Manual MQTT testing commands
 
 ---
 

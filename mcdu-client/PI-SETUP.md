@@ -1,8 +1,8 @@
 # Raspberry Pi Setup Guide
 
-**Target:** Raspberry Pi 1 Model B Rev 2 (ARMv6)  
-**IP:** 10.10.2.190  
-**User:** pi / mcdu
+**Target:** Raspberry Pi (any model with USB host port)
+**IP:** YOUR_PI_IP (replace with your Pi's actual IP)
+**User:** pi
 
 ---
 
@@ -11,25 +11,16 @@
 From your Mac:
 
 ```bash
-# Go to project directory
-cd /Users/kiraholt/.openclaw/workspace/coding-projects/mcdu-smarthome
-
-# Copy entire mcdu-client folder to Pi
-scp -r mcdu-client/ pi@10.10.2.190:/home/pi/
-
-# Copy hardware driver files
-scp nodejs-test/mcdu.js pi@10.10.2.190:/home/pi/mcdu-client/
-scp nodejs-test/button-map.json pi@10.10.2.190:/home/pi/mcdu-client/
+# Copy the mcdu-client folder to Pi
+scp -r mcdu-client/ pi@YOUR_PI_IP:/home/pi/
 ```
-
-Password: `mcdu`
 
 ---
 
 ## Step 2: SSH into Pi
 
 ```bash
-ssh pi@10.10.2.190
+ssh pi@YOUR_PI_IP
 # Password: mcdu
 ```
 
@@ -87,7 +78,7 @@ nano config.env
 
 **Minimum config.env:**
 ```bash
-MQTT_BROKER=mqtt://10.10.2.X:1883  # Your MQTT broker IP
+MQTT_BROKER=mqtt://YOUR_BROKER_IP:1883  # Your MQTT broker IP
 ```
 
 ---
@@ -106,10 +97,10 @@ MOCK_MODE=true node mcdu-client.js
 **In another terminal (on Mac or Pi):**
 ```bash
 # Subscribe to button events
-mosquitto_sub -h 10.10.2.190 -t mcdu/buttons/event -v
+mosquitto_sub -h YOUR_PI_IP -t mcdu/buttons/event -v
 
 # Send test display update
-mosquitto_pub -h 10.10.2.190 -t mcdu/display/line -m '{"lineNumber":1,"text":"HELLO MCDU","color":"amber"}'
+mosquitto_pub -h YOUR_PI_IP -t mcdu/display/line -m '{"lineNumber":1,"text":"HELLO MCDU","color":"amber"}'
 ```
 
 ---
@@ -133,7 +124,7 @@ node mcdu-client.js
 
 **Test display:**
 ```bash
-mosquitto_pub -h 10.10.2.190 -t mcdu/display/line -m '{
+mosquitto_pub -h YOUR_PI_IP -t mcdu/display/line -m '{
   "lineNumber": 1,
   "text": "RASPBERRY PI ONLINE ",
   "color": "green"
@@ -143,7 +134,7 @@ mosquitto_pub -h 10.10.2.190 -t mcdu/display/line -m '{
 **Test buttons:**
 ```bash
 # Monitor button events
-mosquitto_sub -h 10.10.2.190 -t mcdu/buttons/event -v
+mosquitto_sub -h YOUR_PI_IP -t mcdu/buttons/event -v
 
 # Press physical buttons on MCDU, should see:
 # mcdu/buttons/event {"button":"LSK1L","action":"press","timestamp":...}
@@ -151,7 +142,7 @@ mosquitto_sub -h 10.10.2.190 -t mcdu/buttons/event -v
 
 **Test LEDs:**
 ```bash
-mosquitto_pub -h 10.10.2.190 -t mcdu/leds/set -m '{
+mosquitto_pub -h YOUR_PI_IP -t mcdu/leds/set -m '{
   "leds": {
     "RDY": true,
     "FAIL": false,
@@ -207,7 +198,7 @@ ls -l /dev/hidraw*
 systemctl status mosquitto
 
 # Test from Pi
-mosquitto_pub -h 10.10.2.X -t test -m "hello"
+mosquitto_pub -h YOUR_BROKER_IP -t test -m "hello"
 ```
 
 ### High CPU on Pi 1
@@ -252,6 +243,6 @@ sudo journalctl -u mcdu-client -f
 ## Next Steps
 
 After Pi is working:
-1. Proceed to Phase 3b (ioBroker adapter)
-2. Connect ioBroker to same MQTT broker
-3. Test end-to-end integration
+1. Configure the ioBroker MCDU adapter to connect to the same MQTT broker
+2. Set up pages and function keys in the Admin UI
+3. Test end-to-end: button presses on hardware should navigate pages, display should update
