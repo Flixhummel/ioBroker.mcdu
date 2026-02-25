@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* Switch to npm trusted publishing (OIDC) for automated releases
 
 ## 0.1.3 (2026-02-25)
 * Added NPM_TOKEN with mfa to GitHub Actions deploy workflow
