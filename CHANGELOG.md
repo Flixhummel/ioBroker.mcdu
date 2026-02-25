@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* Added NPM_TOKEN to GitHub Actions deploy workflow
 
 ## 0.1.1 (2026-02-25)
 * Updated README with project backstory
