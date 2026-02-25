@@ -85,7 +85,8 @@ describe('Package files', () => {
         });
 
         it('should have title and description', () => {
-            expect(ioPackageJson.common.title).to.be.a('string');
+            expect(ioPackageJson.common.titleLang).to.be.an('object');
+            expect(ioPackageJson.common.titleLang.en).to.be.a('string');
             expect(ioPackageJson.common.desc).to.be.an('object');
             expect(ioPackageJson.common.desc.en).to.be.a('string');
         });
