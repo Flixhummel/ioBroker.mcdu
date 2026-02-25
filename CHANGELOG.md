@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* Re-add mocha as direct devDependency (needed for CI)
 
 ## 0.1.5 (2026-02-25)
 * Fix ioBroker repository checker errors and warnings
