@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* Fix ioBroker repository checker errors and warnings
 
 ## 0.1.4 (2026-02-25)
 * Switch to npm trusted publishing (OIDC) for automated releases
