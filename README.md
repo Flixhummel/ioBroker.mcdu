@@ -108,6 +108,9 @@ For detailed documentation, see [docs/](docs/README.md).
     ### **WORK IN PROGRESS**
 -->
 
+### 0.1.5 (2026-02-25)
+* (Flixhummel) Fix ioBroker repository checker errors and warnings
+
 ### 0.1.4 (2026-02-25)
 * (Flixhummel) Switch to npm trusted publishing (OIDC) for automated releases
 
