@@ -89,6 +89,12 @@ class McduAdapter extends utils.Adapter {
 
         /** @type {NodeJS.Timeout|null} Timeout check interval */
         this.timeoutCheckInterval = null;
+
+        /** @type {NodeJS.Timeout|null} Splash screen timeout */
+        this.splashTimeout = null;
+
+        /** @type {NodeJS.Timeout|null} Notification auto-clear timeout */
+        this.notificationTimeout = null;
         
         // Bind event handlers
         this.on('ready', this.onReady.bind(this));
@@ -813,7 +819,8 @@ class McduAdapter extends utils.Adapter {
         this.log.info(`Splash screen shown on ${deviceId}`);
 
         // After 3 seconds, render home page
-        setTimeout(async () => {
+        this.splashTimeout = setTimeout(async () => {
+            this.splashTimeout = null;
             try {
                 this.displayPublisher.lastContent = null; // Force re-render
                 await this.renderCurrentPage();
@@ -905,9 +912,13 @@ class McduAdapter extends utils.Adapter {
         await this.displayPublisher.publishLine(lineNum, message.val, color);
         
         this.log.info(`Notification shown: ${message.val} (${type?.val})`);
-        
+
         // Auto-clear after duration
-        setTimeout(() => {
+        if (this.notificationTimeout) {
+            clearTimeout(this.notificationTimeout);
+        }
+        this.notificationTimeout = setTimeout(() => {
+            this.notificationTimeout = null;
             this.clearNotification();
         }, durationMs);
     }
@@ -935,7 +946,11 @@ class McduAdapter extends utils.Adapter {
         await this.displayPublisher.publishLine(13, message, color);
         this.log.info(`Notification shown on ${deviceId}: ${message} (${type?.val || 'info'})`);
 
-        setTimeout(() => {
+        if (this.notificationTimeout) {
+            clearTimeout(this.notificationTimeout);
+        }
+        this.notificationTimeout = setTimeout(() => {
+            this.notificationTimeout = null;
             this.clearNotification();
         }, durationMs);
     }
@@ -1853,6 +1868,14 @@ class McduAdapter extends utils.Adapter {
                 clearInterval(this.timeoutCheckInterval);
                 this.timeoutCheckInterval = null;
                 this.log.debug('Timeout check interval cleared');
+            }
+            if (this.splashTimeout) {
+                clearTimeout(this.splashTimeout);
+                this.splashTimeout = null;
+            }
+            if (this.notificationTimeout) {
+                clearTimeout(this.notificationTimeout);
+                this.notificationTimeout = null;
             }
             
 

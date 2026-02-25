@@ -1,0 +1,9 @@
+.github/
+.vscode/
+.dev-server/
+docs/
+test/
+.gitignore
+.releaseconfig.json
+eslint.config.mjs
+prettier.config.mjs

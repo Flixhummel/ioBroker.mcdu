@@ -8,7 +8,7 @@
 
 [![NPM](https://nodei.co/npm/iobroker.mcdu.png?downloads=true)](https://nodei.co/npm/iobroker.mcdu/)
 
-**Tests:** ![Test and Release](https://github.com/Flixhummel/mcdu/workflows/Test%20and%20Release/badge.svg)
+**Tests:** ![Test and Release](https://github.com/Flixhummel/ioBroker.mcdu/workflows/Test%20and%20Release/badge.svg)
 
 ## MCDU Smart Home Adapter for ioBroker
 
@@ -100,7 +100,7 @@ For detailed documentation, see [docs/](docs/README.md).
     ### **WORK IN PROGRESS**
 -->
 
-### **WORK IN PROGRESS**
+### 0.1.0 (2026-02-25)
 * (Flixhummel) initial release
 
 ## License

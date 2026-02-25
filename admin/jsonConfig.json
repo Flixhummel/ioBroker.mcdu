@@ -15,8 +15,11 @@
               "label": "Broker Address",
               "placeholder": "localhost",
               "default": "localhost",
+              "xs": 12,
               "sm": 12,
-              "md": 6
+              "md": 6,
+              "lg": 6,
+              "xl": 6
             },
             "mqtt.port": {
               "type": "number",
@@ -24,29 +27,41 @@
               "default": 1883,
               "min": 1,
               "max": 65535,
+              "xs": 12,
               "sm": 12,
-              "md": 6
+              "md": 6,
+              "lg": 6,
+              "xl": 6
             },
             "mqtt.username": {
               "type": "text",
               "label": "Username",
               "default": "iobroker",
+              "xs": 12,
               "sm": 12,
-              "md": 6
+              "md": 6,
+              "lg": 6,
+              "xl": 6
             },
             "mqtt.password": {
               "type": "password",
               "label": "Password",
+              "xs": 12,
               "sm": 12,
-              "md": 6
+              "md": 6,
+              "lg": 6,
+              "xl": 6
             },
             "mqtt.topicPrefix": {
               "type": "text",
               "label": "Topic Prefix",
               "default": "mcdu",
               "help": "MQTT topic prefix (lowercase, numbers, dashes, slashes only)",
+              "xs": 12,
               "sm": 12,
-              "md": 6
+              "md": 6,
+              "lg": 6,
+              "xl": 6
             }
           }
         },
@@ -621,7 +636,7 @@
         "_github": {
           "type": "staticLink",
           "text": "GitHub Repository",
-          "href": "https://github.com/Flixhummel/mcdu",
+          "href": "https://github.com/Flixhummel/ioBroker.mcdu",
           "sm": 12
         }
       }

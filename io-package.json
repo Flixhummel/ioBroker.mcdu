@@ -4,19 +4,10 @@
     "version": "0.1.0",
     "news": {
       "0.1.0": {
-        "en": "Phase 4.1: Added 32 automation states for external control (LEDs, notifications, navigation, buttons, runtime monitoring)",
-        "de": "Phase 4.1: 32 Automatisierungs-States hinzugefügt für externe Steuerung (LEDs, Benachrichtigungen, Navigation, Tasten, Laufzeit-Überwachung)"
-      },
-      "1.0.0": {
-        "en": "Production release - Complete Phase 1-4 implementation with admin UI and comprehensive documentation",
-        "de": "Produktions-Release - Vollständige Phase 1-4 Implementierung mit Admin UI und umfassender Dokumentation"
-      },
-      "0.1.0": {
-        "en": "Initial release - Phase 1 foundation",
-        "de": "Erstveröffentlichung - Phase 1 Grundlage"
+        "en": "Initial release with MQTT bridge, page system, admin UI, and automation states",
+        "de": "Erstveröffentlichung mit MQTT-Bridge, Seitensystem, Admin UI und Automatisierungs-States"
       }
     },
-    "title": "MCDU Smart Home Control",
     "titleLang": {
       "en": "MCDU Smart Home Control",
       "de": "MCDU Smart Home Steuerung"
@@ -30,12 +21,14 @@
     ],
     "keywords": [
       "MCDU",
-      "smart home",
       "aviation",
       "MQTT",
       "display"
     ],
-    "license": "MIT",
+    "licenseInformation": {
+      "license": "MIT",
+      "type": "free"
+    },
     "platform": "Javascript/Node.js",
     "loglevel": "info",
     "mode": "daemon",
@@ -47,19 +40,19 @@
     "tier": 3,
     "icon": "mcdu.png",
     "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/kiraholt/iobroker.mcdu/main/admin/mcdu.png",
-    "readme": "https://github.com/kiraholt/iobroker.mcdu/blob/main/README.md",
+    "extIcon": "https://raw.githubusercontent.com/Flixhummel/ioBroker.mcdu/main/admin/mcdu.png",
+    "readme": "https://github.com/Flixhummel/ioBroker.mcdu/blob/main/README.md",
     "adminUI": {
       "config": "json"
     },
     "dependencies": [
       {
-        "js-controller": ">=3.3.22"
+        "js-controller": ">=5.0.19"
       }
     ],
     "globalDependencies": [
       {
-        "admin": ">=5.0.0"
+        "admin": ">=6.17.14"
       }
     ]
   },
