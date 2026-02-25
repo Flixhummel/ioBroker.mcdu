@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.1.4 (2026-02-25)
 * Switch to npm trusted publishing (OIDC) for automated releases
 
 ## 0.1.3 (2026-02-25)

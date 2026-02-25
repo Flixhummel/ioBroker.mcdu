@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mcdu",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "news": {
+      "0.1.4": {
+        "en": "Switch to npm trusted publishing (OIDC) for automated releases",
+        "de": "Wechseln Sie zu npm Trusted Publishing (OIDC) für automatisierte Versionen",
+        "ru": "Переход на доверенную публикацию npm (OIDC) для автоматизированных выпусков",
+        "pt": "Mudar para a publicação confiável do npm (OIDC) para versões automatizadas",
+        "nl": "Overschakelen naar npm vertrouwde publicatie (OIDC) voor geautomatiseerde releases",
+        "fr": "Passer à npm de confiance en publication (OIDC) pour les versions automatisées",
+        "it": "Passare a npm editoria fidata (OIDC) per release automatizzate",
+        "es": "Cambiar a npm publicación de confianza (OIDC) para versiones automatizadas",
+        "pl": "Przełącz na zaufane wydawnictwo npm (OIDC) dla zautomatyzowanych wydań",
+        "uk": "Переключення на npm перевірене видання (OIDC) для автоматизованих релізів",
+        "zh-cn": "切换到 npm 信任的出版( OIDC) 自动发行"
+      },
       "0.1.3": {
         "en": "Added NPM_TOKEN with mfa to GitHub Actions deploy workflow",
         "de": "NPM_TOKEN mit mfa zu GitHub Aktionen zur Bereitstellung von Workflow",
