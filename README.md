@@ -12,7 +12,15 @@
 
 ## MCDU Smart Home Adapter for ioBroker
 
-Control your smart home through a WINWING MCDU-32-CAPTAIN aviation cockpit display via MQTT. The adapter provides an authentic airline-style interface with scratchpad input, page navigation, confirmation dialogs, and a 14x24 character display with 8 colors.
+Control your smart home through a WINWING MCDU-32-CAPTAIN aviation cockpit display via MQTT. This project levels up your smarthome with an authentic airline-style interface with scratchpad input, page navigation, confirmation dialogs, and a 14x24 character display with 8 colors.
+
+We all were there before: Mounting tablets on walls for smarthome control, messing with cumbersome visualizations, taking ages to get to the right switch to control a lightbulb.
+Having a pilot in my family I had an immediate incling when I saw the cockpit MCDU: Easy concept for data entry, quick selection of the right data point. And then I found a fantastic product from Winwing https://eu.winctrl.com/view/goods-details.html?id=945 and started with the reverse engineering. shout out to https://github.com/alha847 for the information provided on the device.
+
+As I am not a developer but a tech geek, I used claude code in a structured way. first for gathering information on the device and reverse engineering it, then for structuring the right architecture for the smart home context and then developing the adapter for iobroker and the client for the raspberry.
+Thanks and shout outs to the great open source community, especially https://github.com/klein0r and his great videos on adapter development and iobroker smarthome applications of all sorts.
+
+this is the first version of the adapter and client. I still have to test it properly and make some improvements. Feel free to contribute to it.
 
 ### Architecture
 
