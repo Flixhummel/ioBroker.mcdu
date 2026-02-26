@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mcdu",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "news": {
+      "0.1.9": {
+        "en": "Rewrite GETTING-STARTED.md with full installation instructions for adapter and mcdu-client",
+        "de": "Rewrite GETTING-STARTED.md mit vollständigen Installationsanweisungen für Adapter und mcdu-client",
+        "ru": "Переписать GETTING-STARTED.md с полными инструкциями по установке адаптера и mcdu-клиента",
+        "pt": "Reescrever GETTING-STARTED.md com instruções de instalação completas para adaptador e cliente mcdu",
+        "nl": "Herschrijf GETTING-STARTED.md met volledige installatie-instructies voor adapter en mcdu-client",
+        "fr": "Réécrire GETTING-STARTED.md avec instructions d'installation complètes pour adaptateur et client mcdu",
+        "it": "Riscrivere GETTING-STARTED.md con istruzioni di installazione complete per adattatore e mcdu-client",
+        "es": "Reescribir GETTING-STARTED.md con instrucciones de instalación completas para adaptador y mcdu-client",
+        "pl": "Przepisz GETTING- STARTED.md z pełną instrukcją instalacji adaptera i mcdu- client",
+        "uk": "Rewrite GETTING-STARTED.md з повним монтажним інструкціям для адаптера і mcdu-client",
+        "zh-cn": "重写 Getting-STARTED.md 并附有适配器和mcdu客户端的完整安装指令"
+      },
       "0.1.8": {
         "en": "Remove unpublished news entries (0.1.5, 0.1.6) from io-package.json\nAdd missing responsive size attributes (xs, lg, xl) to Admin UI jsonConfig",
         "de": "Entfernen Sie unveröffentlichte Nachrichteneinträge (0.1.5, 0.1.6) aus io-package. Json\nHinzufügen fehlender responsive Größe Attribute (xs, lg, xl) zu Admin UI jsonConfig",

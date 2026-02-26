@@ -1,5 +1,7 @@
 # Changelog
 ## **WORK IN PROGRESS**
+
+## 0.1.9 (2026-02-26)
 * Rewrite GETTING-STARTED.md with full installation instructions for adapter and mcdu-client
 
 ## 0.1.8 (2026-02-26)
