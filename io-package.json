@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mcdu",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "news": {
+      "0.1.8": {
+        "en": "Remove unpublished news entries (0.1.5, 0.1.6) from io-package.json\nAdd missing responsive size attributes (xs, lg, xl) to Admin UI jsonConfig",
+        "de": "Entfernen Sie unveröffentlichte Nachrichteneinträge (0.1.5, 0.1.6) aus io-package. Json\nHinzufügen fehlender responsive Größe Attribute (xs, lg, xl) zu Admin UI jsonConfig",
+        "ru": "Удалить неопубликованные записи новостей (0.1.5, 0.1.6) из io-пакета. Джонсон\nДобавьте отсутствующие атрибуты размера (xs, lg, xl) в Admin UI jsonConfig",
+        "pt": "Remover entradas de notícias não publicadas (0.1.5, 0.1.6) do pacote io. json\nAdicionar os atributos de tamanho de resposta em falta (xs, lg, xl) ao administrador UI jsonConfig",
+        "nl": "Verwijder ongepubliceerde nieuwsitems (0.1.5, 0,1.6) uit io-package. json\nVoeg ontbrekende responsieve grootte-attributen (xs, lg, xl) toe aan Admin UI jsonConfig",
+        "fr": "Supprimer les nouvelles inédites (0.1.5, 0.16) de io-package. Json\nAjouter les attributs de taille responsive manquants (xs, lg, xl) à l'interface d'administration jsonConfig",
+        "it": "Rimuovere le notizie inedite (0.1.5, 0.1.6) da io-package. J\nAggiungere mancanti attributi di dimensione reattiva (x, lg, xl) ad Admin UI jsonConfig",
+        "es": "Eliminar las entradas de noticias inéditas (0.1.5, 0.1.6) del io-paquete. json\nAtributos de tamaño receptivo (xs, lg, xl) a Admin UI jsonConfig",
+        "pl": "Usuń nieopublikowane wpisy wiadomości (0.1.5, 0.1.6) z pakietu jo-. json\nDodaj brakujące atrybuty responsywne wielkości (xs, lg, xl) do Admin UI jsonConfig",
+        "uk": "Видалити неопубліковані записи новин (0.1.5, 0.1.6) від io-package. свінгери\nДодати відсутні атрибути чуйного розміру (xs, lg, xl) до Admin UI jsonConfig",
+        "zh-cn": "从io-package中删除未发表的新闻条目(0.1.5,0.1.6). 贾森\n添加缺失的响应大小属性( xs, lg, xl) 到 Admin UI jsonConfig"
+      },
       "0.1.7": {
         "en": "Fix package test for titleLang (title field was deprecated)",
         "de": "Fix-Pakettest für TitelLang (Titelfeld wurde abgeschrieben)",
