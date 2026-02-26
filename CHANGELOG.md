@@ -1,5 +1,7 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* Remove unpublished news entries (0.1.5, 0.1.6) from io-package.json
+* Add missing responsive size attributes (xs, lg, xl) to Admin UI jsonConfig
 
 ## 0.1.7 (2026-02-25)
 * Fix package test for titleLang (title field was deprecated)

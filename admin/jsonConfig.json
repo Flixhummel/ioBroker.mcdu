@@ -78,8 +78,11 @@
               "default": 24,
               "disabled": "true",
               "help": "Fixed by hardware",
+              "xs": 12,
               "sm": 12,
-              "md": 6
+              "md": 6,
+              "lg": 6,
+              "xl": 6
             },
             "display.rows": {
               "type": "number",
@@ -87,8 +90,11 @@
               "default": 14,
               "disabled": "true",
               "help": "Fixed by hardware",
+              "xs": 12,
               "sm": 12,
-              "md": 6
+              "md": 6,
+              "lg": 6,
+              "xl": 6
             }
           }
         },
@@ -106,8 +112,11 @@
               "min": 50,
               "max": 1000,
               "help": "Minimum time between display updates (prevents flooding)",
+              "xs": 12,
               "sm": 12,
-              "md": 6
+              "md": 6,
+              "lg": 6,
+              "xl": 6
             },
             "performance.maxQueueSize": {
               "type": "number",
@@ -116,8 +125,11 @@
               "min": 10,
               "max": 1000,
               "help": "Maximum pending display updates",
+              "xs": 12,
               "sm": 12,
-              "md": 6
+              "md": 6,
+              "lg": 6,
+              "xl": 6
             }
           }
         }
@@ -134,7 +146,11 @@
             "_deviceInfo": {
               "type": "staticText",
               "text": "Select a device, then load its page configuration. Edit pages below and save back to the device.",
-              "sm": 12
+              "xs": 12,
+              "sm": 12,
+              "md": 12,
+              "lg": 12,
+              "xl": 12
             },
             "selectedDevice": {
               "type": "selectSendTo",

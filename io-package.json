@@ -16,32 +16,6 @@
         "uk": "Перевірка пакету для назви",
         "zh-cn": "标题Lang的固定包测试(标题字段已贬值)"
       },
-      "0.1.6": {
-        "en": "Re-add mocha as direct devDependency (needed for CI)",
-        "de": "Re-add mocha als direkte devDependency (gefordert für CI)",
-        "ru": "Повторное добавление mocha в качестве прямой зависимости (необходимо для CI)",
-        "pt": "Readicionar mocha como devDependência direta (necessária para IC)",
-        "nl": "Mokka opnieuw toevoegen als direct devDependency (nodig voor CI)",
-        "fr": "Réajouter le moka comme devDependency direct (nécessaire pour l'IC)",
-        "it": "Mocha re-add come devDependency diretto (necessario per CI)",
-        "es": "Readd mocha as direct devDependency (necesidad para CI)",
-        "pl": "Ponownie dodać mocha jako bezpośredni devendendency (potrzebne do CI)",
-        "uk": "Re-add mocha як прямий devDependency",
-        "zh-cn": "重新添加Mocha作为直接依赖性(CI需要)"
-      },
-      "0.1.5": {
-        "en": "Fix ioBroker repository checker errors and warnings",
-        "de": "Fix ioBroker Repository Checker Fehler und Warnungen",
-        "ru": "Исправьте ошибки и предупреждения в репозитории ioBroker",
-        "pt": "Corrigir erros e avisos do verificador de repositório ioBroker",
-        "nl": "Fix ioBroker repository checker fouten en waarschuwingen",
-        "fr": "Correction des erreurs et des avertissements du vérificateur de dépôt ioBroker",
-        "it": "Risolvere gli errori e gli avvisi di iBroker repository",
-        "es": "Corregir errores y advertencias del repositorio ioBroker",
-        "pl": "Naprawiono błędy i ostrzeżenia związane z sprawdzaniem repozytorium jOBroker",
-        "uk": "Виправлення помилок і попередження ioBroker",
-        "zh-cn": "修复 ioBroker 仓库检查器错误和警告"
-      },
       "0.1.4": {
         "en": "Switch to npm trusted publishing (OIDC) for automated releases",
         "de": "Wechseln Sie zu npm Trusted Publishing (OIDC) für automatisierte Versionen",
