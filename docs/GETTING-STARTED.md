@@ -6,7 +6,7 @@ This guide walks you through installing and connecting both components of the MC
 
 ```
 ┌──────────────────┐        MQTT        ┌──────────────────┐       USB HID      ┌──────────────┐
-│   ioBroker       │ ◄────────────────► │   mcdu-client    │ ◄────────────────► │  MCDU-32-    │
+│   ioBroker       │ <────────────────> │   mcdu-client    │ <────────────────> │  MCDU-32-    │
 │   Adapter        │                    │   (Raspberry Pi) │                    │  CAPTAIN     │
 │   (iobroker.mcdu)│                    │                  │                    │  (Hardware)  │
 └──────────────────┘                    └──────────────────┘                    └──────────────┘
@@ -26,8 +26,8 @@ Both communicate over MQTT. You need a running MQTT broker (e.g., Mosquitto) acc
 
 - A running **ioBroker** installation
 - An **MQTT broker** (e.g., Mosquitto) reachable by both ioBroker and the Pi
-- A **Raspberry Pi** with the WinWing MCDU-32-CAPTAIN connected via USB
-- **Node.js 12+** on the Pi
+- A **Raspberry Pi 4** (or 3B+) with Pi OS Lite 64-bit and the WinWing MCDU-32-CAPTAIN connected via USB
+- **Node.js 18+** on the Pi
 
 ---
 
@@ -76,7 +76,8 @@ iobroker add mcdu
 1. Open the Admin UI and go to **Instances**
 2. Click the wrench icon on `mcdu.0`
 3. Configure at minimum:
-   - **MQTT Broker Address** -- IP/hostname of your MQTT broker (e.g., `mqtt://10.10.5.50:1883`)
+   - **MQTT Broker Address** -- IP/hostname of your MQTT broker (e.g., `localhost`)
+   - **MQTT Port** -- default `1883`
 4. Save and close -- the adapter will start and connect to MQTT
 
 The Admin UI has four configuration tabs:
@@ -92,39 +93,34 @@ The Admin UI has four configuration tabs:
 
 The mcdu-client is the USB HID bridge that runs on the Pi next to the physical MCDU hardware.
 
-> For the full step-by-step guide with troubleshooting, see [`mcdu-client/QUICKSTART.md`](../mcdu-client/QUICKSTART.md).
-> For a deployment checklist, see [`mcdu-client/DEPLOYMENT-CHECKLIST.md`](../mcdu-client/DEPLOYMENT-CHECKLIST.md).
+> For the full step-by-step guide with troubleshooting, see [`mcdu-client/GETTING-STARTED.md`](../mcdu-client/GETTING-STARTED.md).
 
-### Essential Steps
-
-**a) Install system dependencies:**
+### Install Node.js
 
 ```bash
-sudo apt update
-sudo apt install -y nodejs npm
-node --version   # Should be v12 or higher
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
+sudo apt-get install -y nodejs
+node --version   # Should show v20.x
 ```
 
-**b) Transfer project files to the Pi:**
+### Clone and install
 
 ```bash
-# From your dev machine
-scp -r mcdu-client/ pi@YOUR_PI_IP:~/mcdu-client
+cd ~
+git clone https://github.com/Flixhummel/ioBroker.mcdu.git
+cd ioBroker.mcdu/mcdu-client
+./install.sh
 ```
 
-Or clone the repository directly on the Pi.
+The install script will:
+- Run `npm install` (prebuilt binaries for node-hid, no compiler needed)
+- Create `config.env` from template
+- Install a udev rule for hidraw USB access
+- Optionally install a systemd service
 
-**c) Install Node.js dependencies:**
-
-```bash
-cd ~/mcdu-client
-npm install
-```
-
-**d) Configure:**
+### Configure
 
 ```bash
-cp config.env.template config.env
 nano config.env
 ```
 
@@ -135,55 +131,28 @@ MQTT_BROKER=mqtt://YOUR_BROKER_IP:1883
 MQTT_TOPIC_PREFIX=mcdu
 ```
 
-**e) Set up USB permissions:**
-
-Create a udev rule so the client can access the MCDU without root:
-
-```bash
-sudo tee /etc/udev/rules.d/99-winwing.rules << 'EOF'
-SUBSYSTEM=="usb", ATTR{idVendor}=="4098", MODE="0666"
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="4098", MODE="0666"
-EOF
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-```
-
-Also add your user to the `input` group:
-
-```bash
-sudo usermod -a -G input $USER
-# Log out and back in for the group change to take effect
-```
-
-**f) Test run:**
+### Test run
 
 ```bash
 node mcdu-client.js
 ```
 
-You should see:
-```
-✓ Connected to MCDU-32-CAPTAIN
-✓ Hardware initialized
-✓ Connected to MQTT broker
-=== Ready ===
-```
+You should see the client connect to MQTT and render the display. Press `Ctrl+C` to stop.
 
-Press `Ctrl+C` to stop.
-
-**g) Install as systemd service:**
+### Start as service
 
 ```bash
-sudo cp mcdu-client.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable mcdu-client
 sudo systemctl start mcdu-client
+sudo journalctl -u mcdu-client -f
 ```
 
-Check status:
+### Updating
 
 ```bash
-sudo systemctl status mcdu-client
+cd ~/ioBroker.mcdu/mcdu-client
+git pull
+npm install
+sudo systemctl restart mcdu-client
 ```
 
 ---
