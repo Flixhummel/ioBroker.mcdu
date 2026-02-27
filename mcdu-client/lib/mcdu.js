@@ -207,7 +207,7 @@ class MCDU {
         console.log(`[INIT] Starting display init — ${INIT_PACKETS.length} packets`);
         for (let i = 0; i < INIT_PACKETS.length; i++) {
             console.log(`[INIT] Sending packet ${i + 1}/${INIT_PACKETS.length}`);
-            this._writeSync(INIT_PACKETS[i]);
+            await this._write(INIT_PACKETS[i]);
             await new Promise(r => setTimeout(r, 10));
             console.log(`[INIT] Packet ${i + 1} done`);
         }
