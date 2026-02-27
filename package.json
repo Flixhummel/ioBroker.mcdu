@@ -56,8 +56,9 @@
     "build": "echo 'No build step required'",
     "translate": "node admin/i18n.js",
     "release": "release-script",
-    "release:minor": "release-script --patch",
-    "release:major": "release-script --major"
+    "release:patch": "release-script patch",
+    "release:minor": "release-script minor",
+    "release:major": "release-script major"
   },
   "bugs": {
     "url": "https://github.com/Flixhummel/ioBroker.mcdu/issues"
