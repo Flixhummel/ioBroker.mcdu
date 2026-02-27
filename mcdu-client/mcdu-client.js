@@ -303,10 +303,10 @@ function handleDisplaySet(data) {
         color: validateColor(seg.color)
       }));
       displayCache.lines[i] = {text, color, segments: validSegments};
-      if (!CONFIG.mockMode) mcdu.setLine(i, validSegments);
+      if (!CONFIG.mockMode && mcdu) mcdu.setLine(i, validSegments);
     } else {
       displayCache.lines[i] = {text, color};
-      if (!CONFIG.mockMode) mcdu.setLine(i, text, color);
+      if (!CONFIG.mockMode && mcdu) mcdu.setLine(i, text, color);
     }
   });
 
