@@ -63,11 +63,11 @@ The ioBroker adapter runs all business logic (page rendering, input handling, va
 | UX Phase G: Admin UI Polish & Integration | Not started |
 | Hardware Deployment Testing | Not started |
 
-199 tests passing (188 unit + 11 integration).
+228 tests passing (217 unit + 11 integration).
 
 ### Recommended Hardware (mcdu-client)
 
-The mcdu-client is a lightweight Node.js process (~50-100MB RAM) that bridges MQTT to USB HID. It needs WiFi, a USB Host port with libusb support, and enough USB power for the MCDU (~500mA).
+The mcdu-client is a lightweight Node.js process (~50-100MB RAM) that bridges MQTT to USB HID. It needs WiFi, a USB Host port, and enough USB power for the MCDU (~500mA).
 
 | Board | Price | WiFi | USB Host | Verdict |
 |-------|-------|------|----------|---------|
@@ -77,7 +77,7 @@ The mcdu-client is a lightweight Node.js process (~50-100MB RAM) that bridges MQ
 | Raspberry Pi Zero 2 W | ~$15 | 2.4GHz | OTG adapter needed | Cheap but fiddly single-port OTG setup |
 | ESP32-S3 | $5-15 | Yes | USB OTG | Cannot run Node.js -- would require full C++ rewrite |
 
-**Key constraint**: The WinWing MCDU firmware requires SET_REPORT control transfers (not interrupt OUT). On Linux, the mcdu-client uses the `usb` npm package (libusb) with `controlTransfer(0x21, 0x09, ...)` to achieve this. All Raspberry Pi models support this out of the box.
+**Key constraint**: The WinWing MCDU firmware requires SET_REPORT control transfers (not interrupt OUT). The mcdu-client uses `node-hid` which handles this automatically on all platforms (IOHIDManager on macOS, hidraw on Linux).
 
 ### Quick Start (Development)
 
@@ -107,6 +107,9 @@ For detailed documentation, see [docs/](docs/README.md).
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+
+### 0.1.9 (2026-02-27)
+* (Flixhummel) Unify MCDU driver to node-hid on all platforms, clean up mcdu-client setup
 
 ### 0.1.8 (2026-02-26)
 * (Flixhummel) Remove unpublished news entries and add missing jsonConfig size attributes
