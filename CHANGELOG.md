@@ -1,5 +1,6 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* Fix release-script npm commands to use positional arguments
 
 ## 0.1.9 (2026-02-26)
 * Rewrite GETTING-STARTED.md with full installation instructions for adapter and mcdu-client
