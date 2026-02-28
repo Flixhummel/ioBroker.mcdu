@@ -65,6 +65,7 @@ class MCDU {
         this._hidDevice = null;
         this._buttonPollInterval = null;
         this.buttonCallback = null;
+        this._previouslyPressed = new Set();
         this.page = this._createEmptyPage();
         this.colors = this._createEmptyColorBuffer();
     }
@@ -297,16 +298,24 @@ class MCDU {
 
     _processButtonData(data) {
         const buttonBytes = data.slice(1, 13);
-        const pressed = [];
+        const currentlyPressed = new Set();
         for (let byteIdx = 0; byteIdx < 12; byteIdx++) {
             for (let bitIdx = 0; bitIdx < 8; bitIdx++) {
                 if (buttonBytes[byteIdx] & (1 << bitIdx)) {
-                    pressed.push(byteIdx * 8 + bitIdx);
+                    currentlyPressed.add(byteIdx * 8 + bitIdx);
                 }
             }
         }
-        if (pressed.length > 0 && this.buttonCallback) {
-            this.buttonCallback(pressed);
+        // Edge detection: only report buttons that just transitioned to pressed
+        const newlyPressed = [];
+        for (const btn of currentlyPressed) {
+            if (!this._previouslyPressed.has(btn)) {
+                newlyPressed.push(btn);
+            }
+        }
+        this._previouslyPressed = currentlyPressed;
+        if (newlyPressed.length > 0 && this.buttonCallback) {
+            this.buttonCallback(newlyPressed);
         }
     }
 
