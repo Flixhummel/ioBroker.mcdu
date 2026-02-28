@@ -278,13 +278,15 @@
               "help": "Display name for this page"
             },
             {
-              "type": "autocompleteSendTo",
+              "type": "selectSendTo",
               "attr": "parent",
               "command": "getPageList",
+              "jsonData": "{\"deviceId\": \"${data.selectedDevice}\"}",
+              "alsoDependsOn": ["selectedDevice"],
+              "manual": false,
               "label": "Parent Page",
               "sm": 12,
               "md": 4,
-              "freeSolo": true,
               "help": "Page ID of parent page (leave empty for root page)"
             },
             {
@@ -386,11 +388,13 @@
                   ]
                 },
                 {
-                  "type": "autocompleteSendTo",
+                  "type": "selectSendTo",
                   "attr": "leftTarget",
                   "title": "L-Target",
                   "command": "getPageList",
-                  "freeSolo": true,
+                  "jsonData": "{\"deviceId\": \"${data.selectedDevice}\"}",
+                  "alsoDependsOn": ["selectedDevice"],
+                  "manual": false,
                   "width": "120px",
                   "default": "",
                   "hidden": "data.leftButtonType !== 'navigation'"
@@ -484,11 +488,13 @@
                   ]
                 },
                 {
-                  "type": "autocompleteSendTo",
+                  "type": "selectSendTo",
                   "attr": "rightTarget",
                   "title": "R-Target",
                   "command": "getPageList",
-                  "freeSolo": true,
+                  "jsonData": "{\"deviceId\": \"${data.selectedDevice}\"}",
+                  "alsoDependsOn": ["selectedDevice"],
+                  "manual": false,
                   "width": "120px",
                   "default": "",
                   "hidden": "data.rightButtonType !== 'navigation'"
@@ -558,11 +564,13 @@
               ]
             },
             {
-              "type": "autocompleteSendTo",
+              "type": "selectSendTo",
               "attr": "targetPageId",
               "title": "Target Page",
               "command": "getPageList",
-              "freeSolo": true
+              "jsonData": "{\"deviceId\": \"${data.selectedDevice}\"}",
+              "alsoDependsOn": ["selectedDevice"],
+              "manual": false
             }
           ]
         },

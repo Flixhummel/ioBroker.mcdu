@@ -1106,17 +1106,28 @@ class McduAdapter extends utils.Adapter {
      * Handle getPageList command from admin UI (for parent page dropdown)
      * @param {object} obj - Message object
      */
-    handleGetPageList(obj) {
-        const pages = this.config.pages || [];
-        
-        // Build list of page options for dropdown
-        const pageList = pages.map(p => ({
-            label: p.name || p.id,
-            value: p.id
-        }));
-        
+    async handleGetPageList(obj) {
+        const deviceId = obj.message?.deviceId;
+        let pages = [];
+
+        if (deviceId) {
+            const state = await this.getStateAsync(`devices.${deviceId}.config.pages`);
+            if (state && state.val) {
+                try {
+                    pages = JSON.parse(state.val);
+                } catch (e) {
+                    this.log.warn(`Failed to parse pages for device ${deviceId}: ${e.message}`);
+                }
+            }
+        }
+
+        const pageList = [
+            { label: '---', value: '' },
+            ...pages.map(p => ({ label: p.name || p.id, value: p.id }))
+        ];
+
         this.sendTo(obj.from, obj.command, pageList, obj.callback);
-        this.log.debug(`Returned page list: ${pageList.length} pages`);
+        this.log.debug(`Returned page list: ${pageList.length} pages for device ${deviceId || '(none)'}`);
     }
     
     /**
