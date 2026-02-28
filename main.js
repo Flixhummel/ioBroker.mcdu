@@ -1314,6 +1314,7 @@ class McduAdapter extends utils.Adapter {
             this.log.info(`loadDevicePages: Loaded ${pages.length} pages for device ${deviceId}`);
             this.sendTo(obj.from, obj.command, {
                 native: {
+                    _deviceConfigLoaded: true,
                     pages: flatPages,
                     functionKeys,
                     'display.defaultColor': defaultColorState?.val || 'white',
@@ -1427,6 +1428,7 @@ class McduAdapter extends utils.Adapter {
             // Clear form after save — prevents stale data on next settings open
             this.sendTo(obj.from, obj.command, {
                 native: {
+                    _deviceConfigLoaded: false,
                     pages: [],
                     functionKeys: [],
                     selectedDevice: '',
