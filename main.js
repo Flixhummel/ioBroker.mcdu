@@ -1314,7 +1314,6 @@ class McduAdapter extends utils.Adapter {
             this.log.info(`loadDevicePages: Loaded ${pages.length} pages for device ${deviceId}`);
             this.sendTo(obj.from, obj.command, {
                 native: {
-                    _deviceConfigLoaded: true,
                     pages: flatPages,
                     functionKeys,
                     'display.defaultColor': defaultColorState?.val || 'white',
@@ -1425,18 +1424,7 @@ class McduAdapter extends utils.Adapter {
 
             this.log.info(`saveDevicePages: Saved ${nestedPages.length} pages for device ${deviceId}`);
 
-            // Clear form after save — prevents stale data on next settings open
-            this.sendTo(obj.from, obj.command, {
-                native: {
-                    _deviceConfigLoaded: false,
-                    pages: [],
-                    functionKeys: [],
-                    selectedDevice: '',
-                    'display.defaultColor': 'white',
-                    'display.brightnessStep': 20,
-                    'display.startPage': ''
-                }
-            }, obj.callback);
+            this.sendTo(obj.from, obj.command, { success: true }, obj.callback);
         } catch (error) {
             this.log.error(`Error in saveDevicePages: ${error.message}`);
             this.sendTo(obj.from, obj.command, { error: error.message }, obj.callback);
