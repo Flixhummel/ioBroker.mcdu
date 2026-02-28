@@ -1392,6 +1392,7 @@ class McduAdapter extends utils.Adapter {
             // Update active config if this is the active device
             if (this.displayPublisher && this.displayPublisher.deviceId === deviceId) {
                 this.config.pages = nestedPages;
+                await this.subscribeToDataSources();
                 await this.renderCurrentPage();
             }
 
@@ -1766,6 +1767,7 @@ class McduAdapter extends utils.Adapter {
 
                 // Load device pages into active config
                 await this.loadDevicePagesIntoConfig(deviceId);
+                await this.subscribeToDataSources();
                 await this.initializeRuntime();
 
                 // Set device for display publishing and show splash
@@ -1804,6 +1806,7 @@ class McduAdapter extends utils.Adapter {
 
                 // Load device pages into active config
                 await this.loadDevicePagesIntoConfig(deviceId);
+                await this.subscribeToDataSources();
                 await this.initializeRuntime();
 
                 // Set device for display publishing and show splash
