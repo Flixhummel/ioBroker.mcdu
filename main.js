@@ -1107,17 +1107,39 @@ class McduAdapter extends utils.Adapter {
      * @param {object} obj - Message object
      */
     async handleGetPageList(obj) {
-        this.log.debug(`getPageList message: ${JSON.stringify(obj.message)}`);
         const deviceId = obj.message?.deviceId;
         let pages = [];
 
-        if (deviceId) {
+        if (deviceId && deviceId !== 'undefined') {
+            // Specific device requested
             const state = await this.getStateAsync(`devices.${deviceId}.config.pages`);
             if (state && state.val) {
                 try {
                     pages = JSON.parse(state.val);
                 } catch (e) {
                     this.log.warn(`Failed to parse pages for device ${deviceId}: ${e.message}`);
+                }
+            }
+        } else {
+            // No device specified (e.g. inside table/accordion where jsonData can't resolve)
+            // Collect pages from all devices
+            const devicesObj = await this.getObjectViewAsync('system', 'state', {
+                startkey: `${this.namespace}.devices.`,
+                endkey: `${this.namespace}.devices.\u9999`
+            });
+            if (devicesObj && devicesObj.rows) {
+                for (const row of devicesObj.rows) {
+                    if (row.id.endsWith('.config.pages')) {
+                        const state = await this.getStateAsync(row.id.replace(`${this.namespace}.`, ''));
+                        if (state && state.val) {
+                            try {
+                                const devicePages = JSON.parse(state.val);
+                                pages.push(...devicePages);
+                            } catch (e) {
+                                this.log.warn(`Failed to parse pages from ${row.id}: ${e.message}`);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1128,7 +1150,7 @@ class McduAdapter extends utils.Adapter {
         ];
 
         this.sendTo(obj.from, obj.command, pageList, obj.callback);
-        this.log.debug(`Returned page list: ${pageList.length} pages for device ${deviceId || '(none)'}`);
+        this.log.debug(`Returned page list: ${pageList.length} pages`);
     }
     
     /**
