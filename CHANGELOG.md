@@ -1,5 +1,7 @@
 # Changelog
 ## **WORK IN PROGRESS**
+* Fix translation test to use flat i18n file format
+* Update author to Felix Hummel
 
 ## 0.2.1 (2026-03-22)
 * Address ioBroker adapter review feedback (reviewer McM1957)
