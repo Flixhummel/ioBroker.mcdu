@@ -1,5 +1,5 @@
 # Changelog
-## **WORK IN PROGRESS**
+## 0.2.2 (2026-03-22)
 * Fix translation test to use flat i18n file format
 * Update author to Felix Hummel
 
