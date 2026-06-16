@@ -109,6 +109,7 @@ For detailed documentation, see [docs/](docs/README.md).
 -->
 
 ### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22 now
 * (Flixhummel) Address ioBroker adapter review feedback (reviewer McM1957)
 * (Flixhummel) Migrate to ESLint 9 flat config with @iobroker/eslint-config v2.2.0
 * (Flixhummel) MQTT password now stored encrypted -- users must re-enter password once after updating
