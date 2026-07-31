@@ -19,7 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^16.0.0",
-    "mqtt": "^5.15.1",
+    "mqtt": "^5.15.2",
     "node-hid": "^2.1.2"
   },
   "engines": {
