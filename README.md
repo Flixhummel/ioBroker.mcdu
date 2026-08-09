@@ -138,6 +138,8 @@ For detailed documentation, see [docs/](docs/README.md).
 
 For detailed changelog see [CHANGELOG.md](CHANGELOG.md).
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 MIT License
 
