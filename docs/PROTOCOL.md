@@ -190,7 +190,7 @@ Published once on every client connect (not retained):
     `SEC`, `ATC`, `MENU`, `AIRPORT`
   - Slew: `SLEW_LEFT`, `SLEW_UP`, `SLEW_RIGHT`, `SLEW_DOWN`
   - Alphanumeric: `A`..`Z`, `0`..`9`, `DOT`, `PLUSMINUS`, `SLASH`, `SPACE`
-  - Special: `OVFY`, `CLR`, `BRT`, `DIM`
+  - Special: `OVFY`, `CLR`, `BRT`, `DIM`, `EMPTY_LEFT`, `EMPTY_RIGHT`
 
 ### 2.10 `status/error`
 
