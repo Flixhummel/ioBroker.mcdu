@@ -2149,7 +2149,7 @@ Templates are pre-configured page structures that users can load and customize:
 
 ### MCDU Resources
 - **Phase 3a Spec:** [PHASE3A-SPEC.md](PHASE3A-SPEC.md)
-- **MQTT Protocol:** [MQTT-TEST-COMMANDS.md](MQTT-TEST-COMMANDS.md)
+- **MQTT Protocol:** [MQTT-TEST-COMMANDS.md](../MQTT-TEST-COMMANDS.md)
 - **Hardware Driver:** [lib/mcdu.js](lib/mcdu.js)
 
 ---
